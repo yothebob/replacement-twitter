@@ -1,0 +1,3 @@
+** note
+
+add "twitter.internal" to your /etc/hosts
