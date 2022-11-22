@@ -6,7 +6,7 @@ from .models import Account, Post, Attachment
 class AccountSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Account
-        fields = ['url', 'username', 'name' ]
+        fields = ['url', 'username', 'name', 'following']
 
 class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -16,5 +16,5 @@ class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Post
-        fields = ['url', 'title', 'content', 'account', 'blog' ]
+        fields = ['url', 'title', 'content', 'account', 'blog', 'likes' ]
 

@@ -4,8 +4,7 @@ class Account(models.Model):
     username = models.CharField(max_length=100, default="user")
     password = models.CharField(max_length=100, default="password")
     name = models.CharField(max_length=100, default="user")
-    followers = models.IntegerField(default=0)
-    following = models.IntegerField(default=0)
+    following = models.ManyToManyField("Account", blank=True, null=True, related_name="followers")
     total_posts = models.IntegerField(default=0)
 
     def __str__(self):
@@ -16,7 +15,8 @@ class Post(models.Model):
     content = models.TextField(default="Write your content here (Hint: you can use markdown!)")
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     blog = models.BooleanField(default=False)
-
+    likes = models.ManyToManyField("Account", blank=True, null=True, related_name="liked")
+    
     def __str__(self):
         return self.title;
     
