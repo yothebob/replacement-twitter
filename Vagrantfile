@@ -69,7 +69,7 @@ Vagrant.configure("2") do |config|
   apt install -y nodejs;
   apt-get install -y nginx vim uwsgi;
   apt-get install -y uwsgi-plugin-python3;
-  apt-get install -y python3.8-venv;
+  apt-get install -y python3.10-venv;
   python3 -m venv /var/www/replacement-twitter/venv;
   apt-get install -y python3-pip;
   cd /var/www/replacement-twitter;
