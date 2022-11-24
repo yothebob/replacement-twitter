@@ -13,7 +13,7 @@ class Account(models.Model):
 class Post(models.Model):
     title = models.CharField(max_length=100, default="new Post")
     content = models.TextField(default="Write your content here (Hint: you can use markdown!)")
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="posts")
     blog = models.BooleanField(default=False)
     likes = models.ManyToManyField("Account", blank=True, related_name="post_liked")
     
@@ -32,7 +32,7 @@ class Attachment(models.Model):
     
 class Comment(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     body = models.CharField(max_length=1500, blank=True, null=True)
     likes = models.ManyToManyField("Account", blank=True, related_name="comment_liked")
     
