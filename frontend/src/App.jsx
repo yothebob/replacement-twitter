@@ -1,23 +1,42 @@
 import logo from './logo.svg';
 import styles from './App.module.css';
 
+const fetchAccount = async (key) => {
+    const url = "/api/Account/" + key + "/";
+    const res = await fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }        
+    });
+    const json = await res.json();
+    return json;
+}
+
+const account = await fetchAccount(1);
+
 function App() {
-  return (
+    return (
     <div class={styles.App}>
-      <header class={styles.header}>
-        <img src={logo} class={styles.logo} alt="logo" />
-        <p>
-          Edit <code>src/App.jsx</code> and save to reload.
-        </p>
-        <a
-          class={styles.link}
-          href="https://github.com/solidjs/solid"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn Solid
-        </a>
-      </header>
+      <div>
+        <h3>{account.username}</h3>
+        <div class={styles.feed}>
+          <For each={account.posts}>{(post, i) =>
+              <div class={styles.post}>
+                <div class={styles.displaybar}>
+                  <p> {account.username} </p>
+                  <p> {post.title} </p>
+                </div>
+                <div class={styles.displayaround}>
+                  {post.content}
+                </div>
+                <div class={styles.displaybar}>
+                  <div>{post.likes.length} likes</div>
+                  <div>{post.comments.length} comments</div>
+                </div>
+              </div>
+          }</For>
+        </div>
+        
+      </div>
     </div>
   );
 }

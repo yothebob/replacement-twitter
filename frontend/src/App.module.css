@@ -22,6 +22,31 @@
 .link {
   color: #b318f0;
 }
+.displayaround{
+    display: flex;
+    justify-content: space-around;
+}
+.displaybar{
+    display: flex;
+    justify-content: space-evenly;
+    padding: 20px;
+}
+.post {
+    background-color: #282c34;
+    border :solid;
+    display: flex;
+    border-radius: 20px;
+    width: 50%;
+    margin: 20px;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+}
+.feed {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
 
 @keyframes logo-spin {
   from {
