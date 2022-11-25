@@ -2,19 +2,38 @@ from django.urls import path, include
 from rest_framework import routers, serializers, viewsets
 from .models import Account, Post, Attachment, Comment
 
+
+
+
 class CommentSerializer(serializers.ModelSerializer):
+    account_username = serializers.SerializerMethodField()
+    account_comment_color = serializers.SerializerMethodField()
+    
+    def get_account_username(self, obj):
+        return obj.account.username
+
+    def get_account_comment_color(self, obj):
+        return obj.account.post_color
 
     class Meta:
         model = Comment
-        fields = ['account', 'body', 'post','likes' ]
+        fields = ["id",'account', 'account_username', 'account_comment_color', 'body', 'post','likes' ]
 
 
 class PostSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
+    account_username = serializers.SerializerMethodField()
+    account_post_color = serializers.SerializerMethodField()
+
+    def get_account_username(self, obj):
+        return obj.account.username
+
+    def get_account_post_color(self, obj):
+        return obj.account.post_color
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'account', 'blog', 'likes', "comments"]
+        fields = ['id', 'title', 'content', 'account', "image", "video", 'account_username', 'account_post_color', 'blog', 'likes', "comments"]
 
         
 # Serializers define the API representation.

@@ -17,11 +17,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.models import User
 from rest_framework import routers
-from backend.views import  AttachmentViewSet, PostViewSet, AccountViewSet, login_account, like_item
+from backend.views import  AttachmentViewSet, PostViewSet, AccountViewSet, login_account, like_item, CommentViewSet, add_comment
 
 router = routers.DefaultRouter()
 router.register(r'Account', AccountViewSet)
 router.register(r'Post', PostViewSet)
+router.register(r'Comment', CommentViewSet)
 router.register(r'Attachment', AttachmentViewSet)
 
 
@@ -31,6 +32,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('admin/', admin.site.urls),
     path('api/login/', login_account),
-    path('api/like/', like_item)
+    path('api/like/', like_item),
+    path('api/comment/', add_comment),
 ]
     

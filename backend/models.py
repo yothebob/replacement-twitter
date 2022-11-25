@@ -1,14 +1,25 @@
 from django.db import models
 
+color_choices = (
+    ("white","white"),
+    ("red","red"),
+    ("blue","blue"),
+    ("green","green"),
+    ("purple","purple"),
+    ("pink","pink"),
+)
+
+
 class Account(models.Model):
     username = models.CharField(max_length=100, default="user")
     password = models.CharField(max_length=100, default="password")
     name = models.CharField(max_length=100, default="user")
     following = models.ManyToManyField("Account", blank=True, related_name="followers")
     total_posts = models.IntegerField(default=0)
-
+    post_color = models.CharField(max_length=75, default="white",choices=color_choices)
+    
     def __str__(self):
-        return self.name
+        return self.username
     
 class Post(models.Model):
     title = models.CharField(max_length=100, default="new Post")
@@ -16,6 +27,8 @@ class Post(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="posts")
     blog = models.BooleanField(default=False)
     likes = models.ManyToManyField("Account", blank=True, related_name="post_liked")
+    image = models.CharField(max_length=250, default="", null=True, blank=True)
+    video = models.CharField(max_length=250, default="", null=True, blank=True)
     
     def __str__(self):
         return self.title;

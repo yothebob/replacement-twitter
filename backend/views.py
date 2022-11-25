@@ -4,8 +4,8 @@ import jwt
 from django.shortcuts import render
 from rest_framework import viewsets
 from django.http import JsonResponse
-from .models import Account, Post, Attachment
-from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer
+from .models import Account, Post, Attachment, Comment
+from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer
 from replacement_twitter.settings import SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
 
@@ -19,6 +19,10 @@ class AccountViewSet(viewsets.ModelViewSet):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
 
 class AttachmentViewSet(viewsets.ModelViewSet):
     queryset = Attachment.objects.all()
@@ -51,7 +55,6 @@ def like_item(request):
     if json_decoded["item"] == "post":
         post = Post.objects.filter(id=json_decoded["itemKey"]).first()
         if post is not None:
-            print(posts.likes)
             post.likes.add(account)
             post.save()
             return JsonResponse({ "success": "post liked" })
@@ -64,12 +67,60 @@ def like_item(request):
     return JsonResponse({"error": "Something went wrong..."})        
     
 
-# DEF GET_account_followers(request):
-#     userid = request.GET.get("userid","")
-#     account = Account.objects.filter(id=userid).first()
-#     if account is not None:
-#         followers = Account.o
-#         return JsonResponse({})
-#     else:
-#         return JsonResponse({})
+@csrf_exempt
+def add_comment(request):
+    # { accountId: 1, body: "test", postId: 1 }
+    json_decoded = json.loads(request.body)
+    if json_decoded["body"] is None:
+        return JsonResponse({"error": "Cannot post empty comment"})
+    try:
+        account = Account.objects.filter(id=json_decoded["accountId"]).first()
+        post = Post.objects.filter(id=json_decoded["postId"]).first()
+        if account and post:
+            comment = Comment(
+                body=json_decoded["body"],
+                account=account,
+                post=post)
+            comment.save()
+            serializer = CommentSerializer(comment)
+            return JsonResponse({
+                "success": "comment added successfully",
+                "newComment": serializer.data
+            })
+        else:
+            return JsonResponse({"error": "account or post not found"})
+    except: 
+        return JsonResponse({"error": "Something went wrong.."})
+
+@csrf_exempt
+def create_post(request):
+    json_decoded = json.loads(request.body)
+    if json_decoded["body"] is None:
+        return JsonResponse({"error": "Cannot post empty comment"})
+    try:
+        account = Account.objects.filter(id=json_decoded["account"]).first()
+        new_post = Post(
+            account=account,
+            title=json_decoded["title"],
+            content=json_decoded["content"],
+            blog=False,
+            image=json_decoded["image"],
+            video=json_decoded["video"],
+        )
+        new_post.save()
+        serializer = PostSerializer(new_post)
+        return JsonResponse({"success": "post created", "post": serializer.data})
+    except:
+        return JsonResponse({"error": "Something went wrong.."})
+        
+
     
+    # {
+    #     "title": "",
+    #     "content": "",
+    #     "account": null,
+    #     "image": "",
+    #     "video": "",
+    #     "blog": false,
+    #     "likes": []
+    # }        
