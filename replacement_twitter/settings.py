@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-(9!6p0a#axn$l6%m*_#i(8w^i^#cypi2w5tud2yblfe)7daz7$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["twitter.internal"]
+ALLOWED_HOSTS = ["twitter.internal", '192.168.33.10']
 
 
 # Application definition

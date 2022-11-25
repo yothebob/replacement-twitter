@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from .models import Account, Post, Attachment
 from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer
 from replacement_twitter.settings import SECRET_KEY
+from django.views.decorators.csrf import csrf_exempt
+
 
 
 # ViewSets define the view behavior.
@@ -23,6 +25,9 @@ class AttachmentViewSet(viewsets.ModelViewSet):
     serializer_class = AttachmentSerializer
 
 
+    
+# JWT
+@csrf_exempt
 def login_account(request):
     json_decoded = json.loads(request.body)
     found_account = Account.objects.filter(username=json_decoded["username"], password=json_decoded["password"]).first()

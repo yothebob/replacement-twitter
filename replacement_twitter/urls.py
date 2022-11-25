@@ -30,6 +30,6 @@ router.register(r'Attachment', AttachmentViewSet)
 urlpatterns = [
     path('api/', include(router.urls)),
     path('admin/', admin.site.urls),
-    path('api/login', login_account)
+    path('api/login/', login_account)
 ]
     
