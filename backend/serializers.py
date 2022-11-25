@@ -14,7 +14,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['url', 'title', 'content', 'account', 'blog', 'likes', "comments"]
+        fields = ['id', 'title', 'content', 'account', 'blog', 'likes', "comments"]
 
         
 # Serializers define the API representation.
@@ -22,7 +22,7 @@ class AccountSerializer(serializers.ModelSerializer):
     posts = PostSerializer(many=True, read_only=True)
     class Meta:
         model = Account
-        fields = ['username', 'name', 'following', "posts"]
+        fields = ["id",'username', 'name', 'following', "posts"]
 
 class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

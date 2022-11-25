@@ -40,9 +40,31 @@ def login_account(request):
         }, SECRET_KEY , algorithm="HS256")
         return JsonResponse({ "refresh": refresh })
     return JsonResponse({"error": "not authenticated"})
+
+
+@csrf_exempt
+def like_item(request):
+    json_decoded = json.loads(request.body)
+    account = Account.objects.filter().first()
+    if account is None:
+        return JsonResponse({"error": "Account not found"})
+    if json_decoded["item"] == "post":
+        post = Post.objects.filter(id=json_decoded["itemKey"]).first()
+        if post is not None:
+            print(posts.likes)
+            post.likes.add(account)
+            post.save()
+            return JsonResponse({ "success": "post liked" })
+    elif json_decoded["item"] == "comment":
+        comment = Comment.objects.filter(id=json_decoded["itemKey"]).first()
+        if comment is not None:
+            comment.likes.add(account)
+            comment.save()
+            return JsonResponse({ "success": "post liked" })
+    return JsonResponse({"error": "Something went wrong..."})        
     
 
-# def get_account_followers(request):
+# DEF GET_account_followers(request):
 #     userid = request.GET.get("userid","")
 #     account = Account.objects.filter(id=userid).first()
 #     if account is not None:
