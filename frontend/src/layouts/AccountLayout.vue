@@ -1,18 +1,16 @@
-<template>
-    <q-layout class="flex flex-center" view="lHh Lpr lFf">
+<template >
+    <q-layout class="flex flex-center custom-background" view="lHh Lpr lFf" v-bind:style="{ backgroundImage: 'url(' + Profile.stripped_background_photo + ')' }">
       <div style="display:flex;align-items:center;flex-direction:column;">
 	  <div class="account-header" :style="{'background-color': this.Profile.post_color}" style="width: 100%;display:flex;align-items:center;flex-direction:column;" >
 		  <h3>{{Profile.username}}</h3>
-	      <q-avatar>
-		  <img size="250px" src="https://cdn.quasar.dev/img/avatar.png">
-	      </q-avatar>
+		  <img class="profile-photo" :src="Profile.stripped_profile_photo">
 	      <h5>{{Profile.name}}</h5>
 	      <q-btn icon="navigation" flat :text-color="[followed ? likedColor : unlikedColor]" @click="followAccount" />
 	  </div>
 	  <div class="create-post">
 		  <q-btn label="Create Post" flat  @click="showCreatePost = !showCreatePost" />
 		  <div v-if="showCreatePost" class="create-post-form">
-		      <q-input filled v-model="newPostTitle" label="Filled" /><br/>
+		      <q-input filled v-model="newPostTitle" label="Title" /><br/>
 		      <q-input filled v-model="newPostContent" type="textarea" /><br/>
 		      <q-input
 			  @update:model-value="val => { file = val[0] }"
@@ -20,14 +18,15 @@
 			  type="file"
 			  hint="Native file"
 		      />
+		      <q-btn label="Post" outlined  @click="CreateNewPost" />
 		  </div>
 	  </div>
 	  <div v-for="post in Profile.posts">
 	      <div class="q-pa-md row items-start q-gutter-md" >
-		  <q-card class="my-card" :color="post.account_post_color" style="width: 450px;" >
+		  <q-card class="my-card" :style="{'color' : post.post_creator_post_color}" style="width: 450px;" >
 		       <q-card-section>
 			   <div class="text-h6">{{post.title}}</div>
-			   <div class="text-subtitle2">by {{Profile.username}}</div>
+			   <div class="text-subtitle2">by {{post.post_creator_username}}</div>
 		       </q-card-section>
 
 			   
@@ -47,7 +46,7 @@
 		       <q-separator dark />
 		       
 		       <q-card-actions>
-			   <q-btn @click="likeItem(Auth.id, post.id,'post',post)" :text-color="post.liked" icon="favorite"> {{post.likes.length}}</q-btn>
+			   <q-btn @click="likeItem(Auth.userId, post.id,'post',post)" :text-color="post.liked" icon="favorite"> {{post.likes.length}}</q-btn>
 			   <q-btn @click="postShowComments(post)" flat> Comments {{post.comments.length}}</q-btn>
 		       </q-card-actions>
 
@@ -55,11 +54,16 @@
 			   <div v-for="comment in post.comments">
 			       <q-card-section>
 				   <div class="chat-message" :style="{'background-color': comment.account_comment_color}">
-				       <p><strong>{{comment.account_username}}</strong></p>
+				       <p><strong>{{comment.account_username}}</strong>
+					   <q-avatar>
+					       <img size="250px" style="padding:5px; margin:5px;" :src="Profile.stripped_profile_photo">
+					   </q-avatar>
+
+				       </p>
 				       <p>
 					   {{ comment.body }}
 				       </p>
-				       <q-btn flat icon="favorite" style="width:50px;" :text-color="comment.liked" @click="likeItem(Auth.id, comment.id,'comment',comment)"> {{comment.likes.length}} </q-btn>
+				       <q-btn flat icon="favorite" style="width:50px;" :text-color="comment.liked" @click="likeItem(Auth.userId, comment.id,'comment',comment)"> {{comment.likes.length}} </q-btn>
 				   </div>
 			       </q-card-section>
 			       
@@ -69,7 +73,7 @@
 			   <q-input outlined v-model="newComment" :dense="dense">
 			       <template v-slot:append>
 				   <q-avatar>
-				       <q-icon name="send" @click="submitComment(Auth.id,post)" class="cursor-pointer" />
+				       <q-icon name="send" @click="submitComment(Auth.userId,post)" class="cursor-pointer" />
 				   </q-avatar>
 			       </template>
 			   </q-input>
@@ -84,6 +88,7 @@
 <script>
  import { defineComponent, ref } from 'vue'
  import { useQuasar } from 'quasar'
+ import { useAuthStore } from '../stores/auth';
  
  export default defineComponent({
      name: 'AccountLayout',
@@ -96,43 +101,66 @@
 	 return {
 	     newComment: '',
 	     unlikedColor: "grey",
+	     Q: null,
+	     darkMode: false,
 	     likedColor: "red",
 	     Profile: {},
-	     Auth: {}, // filler until i finish authStore
+	     Auth: null,
 	     darkMode: false,
 	     followed: false,
 	     showCreatePost: false,
+	     newPostTitle: "",
+	     newPostContent: "",
+
 	 }
      },
 
      async created () {
-	 this.Auth = {
-	     "id": 2,
-	     "username": "auth account",
-	     "name": "user",
-	     "post_color": "pink",
-	     "following": [1],
-	     "posts": []
+	 console.log( this.$route.params.username)
+	 this.Auth = useAuthStore();
+	 const valid = await this.Auth.validateSession();
+	 if (this.Auth.hasAccess == false) {
+	     window.location.href = "/login/";
 	 }
-
-	 
-	 this.Profile = await this.getProfilePosts(1);
+	 this.Profile = await this.getProfilePosts(this.$route.params.username);
 	 this.Profile.posts.forEach((post) => {
 	     // TODO added liked here if userid in post.likes?
 	     
-	     post.likes.includes(this.Auth.id) ? post.liked = this.likedColor : post.liked = this.unlikedColor
+	     post.likes.includes(this.Auth.userId) ? post.liked = this.likedColor : post.liked = this.unlikedColor
 	     post.showComments = false;
 	 })
 	 this.Auth.following.includes(this.Profile.id) ? this.followed = true : this.followed = false;
      },
      methods: {
+	 CreateNewPost: async function () {
+	     const url = "/api/post/";
+	     let image = "";
+	     let video = "";
+	     const res = await fetch(url, {
+		 method: "POST",
+		 headers: { "Content-Type": "application/json" },
+		 body: JSON.stringify({
+		     account: this.Profile.id,
+		     postCreator: this.Auth.userId,
+		     title: this.newPostTitle,
+		     content: this.newPostContent,
+		     image: "",
+		     video: "",
+		 })
+	     })
+	     const json = await res.json();
+	     this.showCreatePost = false;
+	     if ("success" in json) {
+		 this.Profile.posts.push(json.post)
+	     }
+	 }, 
 	 followAccount: async function () {
 	     const url = "/api/follow/";
 	     const res = await fetch (url, {
 		 method: "POST",
 		 headers: { "Content-Type": "application/json" },
 		 body: JSON.stringify({
-		     accountId: this.Auth.id,
+		     accountId: this.Auth.userId,
 		     followAccountId: this.Profile.id, // todo switch some of these wuth auth
 		 })
 	     })
@@ -176,7 +204,7 @@
 	     post.showComments = !post.showComments
 	     post.comments.forEach((comment) => {
 		 comment.liked = "white";
-		 comment.likes.includes(this.Auth.id) ? comment.liked = this.likedColor : comment.liked = this.unlikedColor;
+		 comment.likes.includes(this.Auth.userId) ? comment.liked = this.likedColor : comment.liked = this.unlikedColor;
 	     }) 
 	 },
 	 
@@ -216,5 +244,12 @@
      align-items: center;
      justify-content: space-around;
  }
- 
+ .profile-photo {
+     max-width: 400px;
+     height: 300px;
+     border-radius: 50%;
+ }
+ .custom-background {
+     
+ }
 </style>

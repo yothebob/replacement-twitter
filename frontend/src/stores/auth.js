@@ -5,12 +5,19 @@ import { computed } from "@vue/reactivity";
 export const useAuthStore = defineStore("auth", () => {
   const refreshToken = ref(null);
   const hasAccess = ref(false);
+  const userId = ref(null);
 
   if (
     localStorage.getItem("refreshToken") &&
     localStorage.getItem("refreshToken") !== undefined
   ) {
     refreshToken.value = JSON.parse(localStorage.getItem("refreshToken"));
+  }
+  if (
+    localStorage.getItem("userId") &&
+    localStorage.getItem("userId") !== undefined
+  ) {
+    userId.value = JSON.parse(localStorage.getItem("userId"));
   }
   if (
     localStorage.getItem("hasAccess") &&
@@ -22,6 +29,12 @@ export const useAuthStore = defineStore("auth", () => {
   watch( hasAccess,
     (hasAccessVal) => {
 	localStorage.setItem("hasAccess", JSON.stringify(hasAccessVal));
+    },
+    { deep: true }
+  );
+  watch( userId,
+    (userIdVal) => {
+	localStorage.setItem("userId", JSON.stringify(userIdVal));
     },
     { deep: true }
   );
@@ -47,26 +60,24 @@ export const useAuthStore = defineStore("auth", () => {
       if (res.ok) {
 	  if ( "refresh" in json ) {
 	      this.refreshToken = json.refresh;
+	      this.userId = json.id;
 	      this.hasAccess = true;
 	  }
       } else { this.hasAccess = false; }
     }
     
     function clearUserSession() {
-	this.token = null;
-    this.refreshToken = null;
-    this.hasAccess = false;
-    window.location.href = "/login/";
-    return;
+	localStorage.clear();
+	window.location.href = "/login/";
+	return;
   }
 
   async function validateSession() {
-    let url = "/api/token/validate/";
+    let url = "/api/validate/";
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        access: this.token,
         refresh: this.refreshToken,
       }),
     });
@@ -75,8 +86,7 @@ export const useAuthStore = defineStore("auth", () => {
       this.hasAccess = false;
       throw json;
     } else {
-      if ("access" in json) {
-        this.token = json.access;
+      if ("success" in json) {
         this.hasAccess = true;
       } else {
         this.hasAccess = false;
@@ -85,6 +95,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   return {
+    userId,
     hasAccess,
     refreshToken,
     loginUser,

@@ -15,7 +15,7 @@ const routes = [
       ]
   },
   {
-    path: '/account/',
+      path: '/account/:username',
       component: () => import('layouts/AccountLayout.vue'),
       children: [
 	  { path: '/account/', component: () => import('pages/IndexPage.vue') }

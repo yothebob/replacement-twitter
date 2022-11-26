@@ -8,7 +8,7 @@ from .models import Account, Post, Attachment, Comment
 from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer
 from replacement_twitter.settings import SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
-
+import datetime
 
 
 # ViewSets define the view behavior.
@@ -44,17 +44,38 @@ def follow_account(request):
 
 # JWT
 @csrf_exempt
+def validate_login(request):
+    json_decoded = json.loads(request.body)
+    if True:
+    # try:
+        decoded_jwt = jwt.decode(json_decoded["refresh"],SECRET_KEY, algorithms=["HS256"])
+        expire_stamp = datetime.datetime.strptime(decoded_jwt["expire_at"],"%Y-%m-%d %H:%M:%S")
+        now = datetime.datetime.now()
+        if now < expire_stamp:
+            print("success")
+            return JsonResponse({"success": "authenticated"})
+        print("error")
+        return JsonResponse({"Error": "not properly authenticated"})
+    # except:
+    else:
+        print("error")
+        return JsonResponse({"Error": "not properly authenticated"})
+
+# JWT
+@csrf_exempt
 def login_account(request):
     json_decoded = json.loads(request.body)
     found_account = Account.objects.filter(username=json_decoded["username"], password=json_decoded["password"]).first()
+    expiring = (datetime.datetime.now() + datetime.timedelta(days=1)) 
     if found_account is not None:
         refresh = jwt.encode({
             "token_type": "refresh",
             "username": found_account.username,
             "password": found_account.password,
-            "account_id": found_account.id
+            "account_id": found_account.id,
+            "expire_at": expiring.strftime("%Y-%m-%d %H:%M:%S"),
         }, SECRET_KEY , algorithm="HS256")
-        return JsonResponse({ "refresh": refresh })
+        return JsonResponse({ "refresh": refresh , "id": found_account.id})
     return JsonResponse({"error": "not authenticated"})
 
 
@@ -107,31 +128,25 @@ def add_comment(request):
 @csrf_exempt
 def create_post(request):
     json_decoded = json.loads(request.body)
-    if json_decoded["body"] is None:
+    if json_decoded["content"] is None:
         return JsonResponse({"error": "Cannot post empty comment"})
     try:
         account = Account.objects.filter(id=json_decoded["account"]).first()
-        new_post = Post(
-            account=account,
-            title=json_decoded["title"],
-            content=json_decoded["content"],
-            blog=False,
-            image=json_decoded["image"],
-            video=json_decoded["video"],
-        )
-        new_post.save()
-        serializer = PostSerializer(new_post)
-        return JsonResponse({"success": "post created", "post": serializer.data})
+        post_creator = Account.objects.filter(id=json_decoded["postCreator"]).first()
+        if account and post_creator:
+            new_post = Post(
+                account=account,
+                post_creator=post_creator,
+                title=json_decoded["title"],
+                content=json_decoded["content"],
+                blog=False,
+                image=json_decoded["image"],
+                video=json_decoded["video"],
+            )
+            new_post.save()
+            serializer = PostSerializer(new_post)
+            return JsonResponse({"success": "post created", "post": serializer.data})
     except:
         return JsonResponse({"error": "Something went wrong.."})
         
     
-    # {
-    #     "title": "",
-    #     "content": "",
-    #     "account": null,
-    #     "image": "",
-    #     "video": "",
-    #     "blog": false,
-    #     "likes": []
-    # }        
