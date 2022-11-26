@@ -28,8 +28,20 @@ class AttachmentViewSet(viewsets.ModelViewSet):
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
 
+#TODO switch to jwt auth for everything
 
-    
+@csrf_exempt
+def follow_account(request):
+    json_decoded = json.loads(request.body)
+    try:
+        account = Account.objects.filter(id=json_decoded["accountId"]).first()
+        follow_account = Account.objects.filter(id=json_decoded["followAccountId"]).first()
+        account.following.add(follow_account)
+        account.save()
+        return JsonResponse({"success": "Account followed"})        
+    except:
+        return JsonResponse({"error": "Something went wrong.."})        
+
 # JWT
 @csrf_exempt
 def login_account(request):
@@ -113,7 +125,6 @@ def create_post(request):
     except:
         return JsonResponse({"error": "Something went wrong.."})
         
-
     
     # {
     #     "title": "",

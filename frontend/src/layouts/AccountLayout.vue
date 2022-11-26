@@ -1,11 +1,17 @@
 <template>
     <q-layout class="flex flex-center" view="lHh Lpr lFf">
-      <div>
-	  <h3>{{Profile.username}}</h3>
-	  <h5>{{Profile.name}}</h5>
+      <div style="display:flex;align-items:center;flex-direction:column;">
+	  <div class="account-header" style="background-color: yellow; width: 100%;display:flex;align-items:center;flex-direction:column;" >
+		  <h3>{{Profile.username}}</h3>
+	      <q-avatar>
+		  <img size="250px" src="https://cdn.quasar.dev/img/avatar.png">
+	      </q-avatar>
+	      <h5>{{Profile.name}}</h5>
+	      <q-btn icon="navigation" flat :text-color="[followed ? likedColor : unlikedColor]" @click="followAccount" />
+	  </div>
 	  <div v-for="post in Profile.posts">
 	      <div class="q-pa-md row items-start q-gutter-md" >
-		  <q-card class="my-card" :color="post.account_post_color" style="width: 500px;" >
+		  <q-card class="my-card" :color="post.account_post_color" style="width: 450px;" >
 		       <q-card-section>
 			   <div class="text-h6">{{post.title}}</div>
 			   <div class="text-subtitle2">by {{Profile.username}}</div>
@@ -63,19 +69,24 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
-
-export default defineComponent({
+ import { defineComponent, ref } from 'vue'
+ import { useQuasar } from 'quasar'
+ 
+ export default defineComponent({
      name: 'AccountLayout',
-     
      components: {},
-
+     setup () {
+	 const $q = useQuasar()
+	 $q.dark.set(true)
+     },
      data: () => {
 	 return {
 	     newComment: '',
 	     unlikedColor: "grey",
 	     likedColor: "red",
 	     Profile: {},
+	     darkMode: false,
+	     followed: false
 	 }
      },
 
@@ -89,6 +100,21 @@ export default defineComponent({
      },
      
      methods: {
+	 followAccount: async function () {
+	     this.followed ? this.followed = false : this.followed = true;
+	     this.followed != this.followed
+	     const url = "/api/follow/";
+	     const res = await fetch (url, {
+		 method: "POST",
+		 headers: { "Content-Type": "application/json" },
+		 body: {
+		     acocuntId: this.Profile.id,
+		     followAccountId: this.Profile.id, // todo switch some of these wuth auth
+		 }
+	     })
+	     const json = await res.json();
+	     
+	 },
 
 	 submitComment: async function(accountId, post) {
 	     const url = "/api/comment/"
