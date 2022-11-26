@@ -33,13 +33,13 @@ class AttachmentViewSet(viewsets.ModelViewSet):
 @csrf_exempt
 def follow_account(request):
     json_decoded = json.loads(request.body)
-    try:
-        account = Account.objects.filter(id=json_decoded["accountId"]).first()
-        follow_account = Account.objects.filter(id=json_decoded["followAccountId"]).first()
+    account = Account.objects.filter(id=json_decoded["accountId"]).first()
+    follow_account = Account.objects.filter(id=json_decoded["followAccountId"]).first()
+    if account and follow_account:
         account.following.add(follow_account)
         account.save()
         return JsonResponse({"success": "Account followed"})        
-    except:
+    else:
         return JsonResponse({"error": "Something went wrong.."})        
 
 # JWT

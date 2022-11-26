@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework import routers, serializers, viewsets
 from .models import Account, Post, Attachment, Comment
-
+from replacement_twitter.settings import BASE_DIR
 
 
 
@@ -24,16 +24,28 @@ class PostSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     account_username = serializers.SerializerMethodField()
     account_post_color = serializers.SerializerMethodField()
+    stripped_video = serializers.SerializerMethodField()
+    stripped_image = serializers.SerializerMethodField()
 
     def get_account_username(self, obj):
         return obj.account.username
+
+    def get_stripped_video(self, obj):
+        if str(obj.video) != "":
+            return str(obj.video).replace(str(BASE_DIR), "")
+        return ""
+
+    def get_stripped_image(self, obj):
+        if str(obj.image) != "":
+            return str(obj.image).replace(str(BASE_DIR), "")
+        return ""
 
     def get_account_post_color(self, obj):
         return obj.account.post_color
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'account', "image", "video", 'account_username', 'account_post_color', 'blog', 'likes', "comments"]
+        fields = ['id', 'title', 'content', 'account', "stripped_image", "stripped_video", 'account_username', 'account_post_color', 'blog', 'likes', "comments"]
 
         
 # Serializers define the API representation.

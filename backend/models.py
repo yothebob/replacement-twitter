@@ -27,8 +27,8 @@ class Post(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="posts")
     blog = models.BooleanField(default=False)
     likes = models.ManyToManyField("Account", blank=True, related_name="post_liked")
-    image = models.CharField(max_length=250, default="", null=True, blank=True)
-    video = models.CharField(max_length=250, default="", null=True, blank=True)
+    image = models.FilePathField(max_length=250, path="/var/www/replacement-twitter/account-static", null=True, blank=True)
+    video = models.FilePathField(max_length=250, path="/var/www/replacement-twitter/account-static", null=True, blank=True)
     
     def __str__(self):
         return self.title;

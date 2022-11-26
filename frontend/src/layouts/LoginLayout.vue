@@ -11,31 +11,21 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent } from 'vue';
+import { authStore } from "../stores/auth";
+
 
 export default defineComponent({
-  name: 'LoginPage',
-  data: () => {
+     name: 'LoginPage',
+     
+     data: () => {
       return {
 	  username: '',
 	  password: '',
       }
-  },
-    components: {},
-    methods: {
-	loginUser: async function () {
-	    const url = "/api/login/"
-	    const res = await fetch(url, {
-		method: "POST",
-		headers: { 'Content-Type': 'application/json'},
-		body: JSON.stringify({
-		    username: this.username,
-		    password: this.password
-		})
-	    });
-	    const json = await res.json();
-	    return json;
-	}
-    },
-})
+     },
+     components: {},
+     methods: {
+     },
+ })
 </script>

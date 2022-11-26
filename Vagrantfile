@@ -73,6 +73,7 @@ Vagrant.configure("2") do |config|
   python3 -m venv /var/www/replacement-twitter/venv;
   apt-get install -y python3-pip;
   cd /var/www/replacement-twitter;
+  mkdir account-static;
   touch db.sqlite3;
   source venv/bin/activate;
   pip install -r requirements.txt;
