@@ -61,7 +61,7 @@ def login_account(request):
 @csrf_exempt
 def like_item(request):
     json_decoded = json.loads(request.body)
-    account = Account.objects.filter().first()
+    account = Account.objects.filter(id=json_decoded["accountKey"]).first()
     if account is None:
         return JsonResponse({"error": "Account not found"})
     if json_decoded["item"] == "post":

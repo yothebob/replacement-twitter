@@ -53,7 +53,7 @@ class AccountSerializer(serializers.ModelSerializer):
     posts = PostSerializer(many=True, read_only=True)
     class Meta:
         model = Account
-        fields = ["id",'username', 'name', 'following', "posts"]
+        fields = ["id",'username', 'name', 'following', "posts", "post_color"]
 
 class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

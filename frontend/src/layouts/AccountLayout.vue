@@ -1,7 +1,7 @@
 <template>
     <q-layout class="flex flex-center" view="lHh Lpr lFf">
       <div style="display:flex;align-items:center;flex-direction:column;">
-	  <div class="account-header" style="background-color: yellow; width: 100%;display:flex;align-items:center;flex-direction:column;" >
+	  <div class="account-header" :style="{'background-color': this.Profile.post_color}" style="width: 100%;display:flex;align-items:center;flex-direction:column;" >
 		  <h3>{{Profile.username}}</h3>
 	      <q-avatar>
 		  <img size="250px" src="https://cdn.quasar.dev/img/avatar.png">
@@ -47,19 +47,19 @@
 		       <q-separator dark />
 		       
 		       <q-card-actions>
-			   <q-btn @click="likeItem(Profile.id, post.id,'post',post)" :text-color="post.liked" icon="favorite"> {{post.likes.length}}</q-btn>
+			   <q-btn @click="likeItem(Auth.id, post.id,'post',post)" :text-color="post.liked" icon="favorite"> {{post.likes.length}}</q-btn>
 			   <q-btn @click="postShowComments(post)" flat> Comments {{post.comments.length}}</q-btn>
 		       </q-card-actions>
 
 		       <div v-if="post.showComments" >
 			   <div v-for="comment in post.comments">
 			       <q-card-section>
-				   <div class="chat-message">
+				   <div class="chat-message" :style="{'background-color': comment.account_comment_color}">
 				       <p><strong>{{comment.account_username}}</strong></p>
 				       <p>
 					   {{ comment.body }}
 				       </p>
-				       <q-btn flat icon="favorite" style="width:50px;" :text-color="comment.liked" @click="likeItem(Profile.id, comment.id,'comment',comment)"> {{comment.likes.length}} </q-btn>
+				       <q-btn flat icon="favorite" style="width:50px;" :text-color="comment.liked" @click="likeItem(Auth.id, comment.id,'comment',comment)"> {{comment.likes.length}} </q-btn>
 				   </div>
 			       </q-card-section>
 			       
@@ -69,7 +69,7 @@
 			   <q-input outlined v-model="newComment" :dense="dense">
 			       <template v-slot:append>
 				   <q-avatar>
-				       <q-icon name="send" @click="submitComment(Profile.id,post)" class="cursor-pointer" />
+				       <q-icon name="send" @click="submitComment(Auth.id,post)" class="cursor-pointer" />
 				   </q-avatar>
 			       </template>
 			   </q-input>
@@ -98,6 +98,7 @@
 	     unlikedColor: "grey",
 	     likedColor: "red",
 	     Profile: {},
+	     Auth: {}, // filler until i finish authStore
 	     darkMode: false,
 	     followed: false,
 	     showCreatePost: false,
@@ -105,17 +106,25 @@
      },
 
      async created () {
+	 this.Auth = {
+	     "id": 2,
+	     "username": "auth account",
+	     "name": "user",
+	     "post_color": "pink",
+	     "following": [1],
+	     "posts": []
+	 }
+
+	 
 	 this.Profile = await this.getProfilePosts(1);
 	 this.Profile.posts.forEach((post) => {
 	     // TODO added liked here if userid in post.likes?
 	     
-	     post.likes.includes(this.Profile.id) ? post.liked = this.likedColor : post.liked = this.unlikedColor
+	     post.likes.includes(this.Auth.id) ? post.liked = this.likedColor : post.liked = this.unlikedColor
 	     post.showComments = false;
 	 })
-	 //                         fix with authjs \/
-	 this.Profile.following.includes(this.Profile.id) ? this.followed = true : this.followed = false;
+	 this.Auth.following.includes(this.Profile.id) ? this.followed = true : this.followed = false;
      },
-     
      methods: {
 	 followAccount: async function () {
 	     const url = "/api/follow/";
@@ -123,8 +132,8 @@
 		 method: "POST",
 		 headers: { "Content-Type": "application/json" },
 		 body: JSON.stringify({
-		     accountId: this.Profile.id,
-		     followAccountId: 2, // todo switch some of these wuth auth
+		     accountId: this.Auth.id,
+		     followAccountId: this.Profile.id, // todo switch some of these wuth auth
 		 })
 	     })
 	     const json = await res.json();
@@ -167,7 +176,7 @@
 	     post.showComments = !post.showComments
 	     post.comments.forEach((comment) => {
 		 comment.liked = "white";
-		 comment.likes.includes(this.Profile.id) ? comment.liked = this.likedColor : comment.liked = this.unlikedColor;
+		 comment.likes.includes(this.Auth.id) ? comment.liked = this.likedColor : comment.liked = this.unlikedColor;
 	     }) 
 	 },
 	 
@@ -199,8 +208,8 @@
 <style>
  .chat-message {
      max-width: 75%;
+     color: white;
      word-wrap: break-word;
-     background-color: green;
      border-radius: 20px;
      display: flex;
      flex-direction: column;
