@@ -76,11 +76,27 @@ def create_account(request):
             username=json_decoded["username"],
             password=json_decoded["password"],
             name=json_decoded["name"],
-            post_color=json_decoded["post_color"],
+            post_color=json_decoded["postColor"],
         )
         new_account.save()
         return JsonResponse({"Success": "Account made"})
     return JsonResponse({"Error": "something went wrong.."})
+
+# JWT
+@csrf_exempt
+def edit_account(request):
+    json_decoded = json.loads(request.body)
+    jwt = request.headers.get("Auth", None)
+    decoded_jwt =  jwt.decode(json_decoded["refresh"],SECRET_KEY, algorithms=["HS256"])
+    account = Account.objects.filter(id=decoded_jwt["account_id"]).first()
+    if account is None:
+        return JsonResponse({"Error": "something went wrong.."})
+    for key, val in json_decoded.items():
+        if val != "":
+            account.key = val
+    account.save()
+    return JsonResponse({"Success": "Account updated"})
+    # return JsonResponse({"Error": "something went wrong.."})
 
 
 @csrf_exempt
@@ -96,7 +112,8 @@ def login_account(request):
             "account_id": found_account.id,
             "expire_at": expiring.strftime("%Y-%m-%d %H:%M:%S"),
         }, SECRET_KEY , algorithm="HS256")
-        return JsonResponse({ "refresh": refresh , "id": found_account.id})
+        serializer = AccountSerializer(found_account)
+        return JsonResponse({ "refresh": refresh , "id": found_account.id, "auth": serializer.data})
     return JsonResponse({"error": "not authenticated"})
 
 

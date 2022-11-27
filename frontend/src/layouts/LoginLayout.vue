@@ -14,13 +14,13 @@
       <div v-else-if="pageType == 'create'">
 	  <div>
 	      <h3>Create User</h3><br/>
-	      <q-input rounded outlined v-model="username1" label="Username"/>
-	      <q-input rounded outlined v-model="namez" label="name"/>
-	      <q-input rounded outlined v-model="password1" label="Password" type="password"/>
+	      <q-input rounded outlined v-model="username" label="Username"/>
+	      <q-input rounded outlined v-model="name" label="name"/>
+	      <q-input rounded outlined v-model="password" label="Password" type="password"/>
 	      <q-input rounded outlined v-model="passwordAgain" type="password" label="Password Again"/>
 	      <q-select v-model="postColor" :options="colorOptions" label="Post Color" />
 	      <div style="display:flex;justify-contents:space-between;">
-		  <q-btn @click="loginUser" color="white" text-color="black" label="Create user" />
+		  <q-btn @click="createNewUser()" color="white" text-color="black" label="Create user" />
 		  <q-btn @click="pageType='login'" color="white" text-color="black" label="Have account? login" />
 	      </div>
 	  </div>
@@ -42,10 +42,8 @@
 	     pageType: "login",
 	     Auth: null,
 	     username: '',
-	     username1: '',
-	     namez: '',
+	     name: '',
 	     password: '',
-	     password1: '',
 	     passwordAgain: '',
 	     postColor: '',
 	     colorOptions: [],
@@ -71,23 +69,30 @@
 	     if (this.Auth.hasAccess && this.Auth.refreshToken) {
 		 window.location.href = "/account/" + this.Auth.userId ;
 	     }
-	 }
-	 /* createUser: async function () {
-	    console.log("hi")
-	    const url = "/api";
-	    const res = await fetch(url, {
-	    method: "POST",
-	    headers: { "Content-Type": "application/json" },
-	    body: JSON.stringify({
-	    username: this.username1,
-	    namez: this.namez,
-	    password: this.password1,
-	    passwordAgain: this.passwordAgain,
-	    postColor: this.postColor,
-	    })
-	    })
-	    const json = await res.json();
-	    }, */
+	 },
+	 createNewUser: async function () {
+	     const url = "/api/create/";
+	     if (this.password !== this.passwordAgain) {
+		 this.password = "";
+		 this.passwordAgain = "";
+		 return;
+	     }
+	     const res = await fetch(url, {
+		 method: "POST",
+		 headers: { "Content-Type": "application/json" },
+		 body: JSON.stringify({
+		     username: this.username,
+		     name: this.name,
+		     password: this.password,
+		     passwordAgain: this.passwordAgain,
+		     postColor: this.postColor,
+		 })
+	     })
+	     const json = await res.json();
+	     if ("Success" in json) {
+		 window.location.href = "/login";
+	     }
+	 },
      },
  })
 </script>

@@ -4,6 +4,7 @@ import { computed } from "@vue/reactivity";
 
 export const useAuthStore = defineStore("auth", () => {
   const refreshToken = ref(null);
+  const following = ref(null);
   const hasAccess = ref(false);
   const userId = ref(null);
 
@@ -12,6 +13,12 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.getItem("refreshToken") !== undefined
   ) {
     refreshToken.value = JSON.parse(localStorage.getItem("refreshToken"));
+  }
+  if (
+    localStorage.getItem("following") &&
+    localStorage.getItem("following") !== undefined
+  ) {
+    following.value = JSON.parse(localStorage.getItem("following"));
   }
   if (
     localStorage.getItem("userId") &&
@@ -45,6 +52,13 @@ export const useAuthStore = defineStore("auth", () => {
     },
     { deep: true }
   );
+  watch(
+    following,
+    (refreshVal) => {
+      localStorage.setItem("following", JSON.stringify(refreshVal));
+    },
+    { deep: true }
+  );
 
     async function loginUser(username, password) {
     let url = "/api/login/";
@@ -62,6 +76,7 @@ export const useAuthStore = defineStore("auth", () => {
 	      this.refreshToken = json.refresh;
 	      this.userId = json.id;
 	      this.hasAccess = true;
+	      this.following = json.auth.following;
 	  }
       } else { this.hasAccess = false; }
     }
@@ -98,6 +113,7 @@ export const useAuthStore = defineStore("auth", () => {
     userId,
     hasAccess,
     refreshToken,
+    following,
     loginUser,
     validateSession,
     clearUserSession,

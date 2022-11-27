@@ -1,11 +1,23 @@
 <template >
     <q-layout class="flex flex-center custom-background" view="lHh Lpr lFf" v-bind:style="{ backgroundImage: 'url(' + Profile.stripped_background_photo + ')' }">
       <div style="display:flex;align-items:center;flex-direction:column;">
+	  <q-btn color="primary" label="Logout" @click="logoutUser" />
 	  <div class="account-header" :style="{'background-color': this.Profile.post_color}" style="width: 100%;display:flex;align-items:center;flex-direction:column;" >
 		  <h3>{{Profile.username}}</h3>
 		  <img class="profile-photo" :src="Profile.stripped_profile_photo">
 	      <h5>{{Profile.name}}</h5>
-	      <q-btn icon="navigation" flat :text-color="[followed ? likedColor : unlikedColor]" @click="followAccount" />
+	      <q-btn-group spread>
+		  <q-btn color="secondary" :text-color="[followed ? likedColor : unlikedColor]" label="follow" icon="favorite" />
+		  <q-btn v-if="Auth.userId === Profile.id" @click="editProfile = !editProfile" color="secondary" label="Edit" icon="update" />
+	      </q-btn-group>
+	      <q-btn icon="navigation" flat  @click="followAccount" />
+	  </div>
+	  <div v-if="editProfile" class="edit-profile">
+	      <q-input rounded outlined v-model="Profile.username" label="Username"/>
+	      <q-input rounded outlined v-model="Profile.name" label="name"/>
+	      <q-select v-model="post_color" :options="colorOptions" label="Post Color" />
+	      <q-btn label="update" outlined  @click="updateProfile" />
+	      
 	  </div>
 	  <div class="create-post">
 		  <q-btn label="Create Post" flat  @click="showCreatePost = !showCreatePost" />
@@ -107,11 +119,20 @@
 	     showCreatePost: false,
 	     newPostTitle: "",
 	     newPostContent: "",
-
+	     editProfile: false,
+	     colorOptions: [],
 	 }
      },
 
      async created () {
+	 this.colorOptions = [
+	     "white",
+	     "red",
+	     "blue",
+	     "green",
+	     "purple",
+	     "pink",
+	 ];
 	 console.log( this.$route.params.username)
 	 this.Auth = useAuthStore();
 	 const valid = await this.Auth.validateSession();
@@ -128,6 +149,13 @@
 	 this.Auth.following.includes(this.Profile.id) ? this.followed = true : this.followed = false;
      },
      methods: {
+	 logoutUser: function () {
+	     this.Auth.clearUserSession();
+	 },
+	 updateProfile: async function () {
+	     console.log("work")
+	     const url = "/api/update/"
+	 },
 	 CreateNewPost: async function () {
 	     const url = "/api/post/";
 	     
