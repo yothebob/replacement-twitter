@@ -151,6 +151,8 @@
 		     headers: { "Auth": this.Auth.refreshToken, "Post": json.post.id }, 
 		     body: data,
 		 })
+		 const j = await imageAdd.json()
+		 json.post.stripped_image = j.stripped_image
 		 this.Profile.posts.push(json.post)
 	     }
 	 }, 

@@ -68,6 +68,22 @@ def validate_login(request):
 
 # JWT
 @csrf_exempt
+def create_account(request):
+    json_decoded = json.loads(request.body)
+    found_account = Account.objects.filter(username=json_decoded["username"], password=json_decoded["password"]).first()
+    if found_account is None:
+        new_account = Account(
+            username=json_decoded["username"],
+            password=json_decoded["password"],
+            name=json_decoded["name"],
+            post_color=json_decoded["post_color"],
+        )
+        new_account.save()
+        return JsonResponse({"Success": "Account made"})
+    return JsonResponse({"Error": "something went wrong.."})
+
+
+@csrf_exempt
 def login_account(request):
     json_decoded = json.loads(request.body)
     found_account = Account.objects.filter(username=json_decoded["username"], password=json_decoded["password"]).first()
@@ -136,7 +152,6 @@ def add_comment(request):
 # TODO add auth token to auth header
 @csrf_exempt
 def add_post_image(request):
-    print(request.FILES)
     jwt = request.headers.get("Auth", None)
     post_id = request.headers.get("Post", None)
     if jwt is None:
@@ -149,7 +164,7 @@ def add_post_image(request):
         post = Post.objects.filter(id=post_id).first()
         post.image = "/var/www/replacement-twitter/account-static/" + random_str
         post.save()
-        return JsonResponse({"success": "image added"})
+        return JsonResponse({"success": "image added", "stripped_image": f"/account-static/{random_str}" })
     except:
         return JsonResponse({"error": "Something went wrong.."})
         
