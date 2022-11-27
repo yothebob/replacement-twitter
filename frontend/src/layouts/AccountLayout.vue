@@ -12,12 +12,11 @@
 		  <div v-if="showCreatePost" class="create-post-form">
 		      <q-input filled v-model="newPostTitle" label="Title" /><br/>
 		      <q-input filled v-model="newPostContent" type="textarea" /><br/>
-		      <q-input
-			  @update:model-value="val => { file = val[0] }"
-			  filled
-			  type="file"
-			  hint="Native file"
-		      />
+		      <q-file outlined v-model="uploadedImage">
+			  <template v-slot:prepend>
+			      <q-icon name="attach_file" />
+			  </template>
+		      </q-file>
 		      <q-btn label="Post" outlined  @click="CreateNewPost" />
 		  </div>
 	  </div>
@@ -32,10 +31,6 @@
 			   
 		       <q-card-section v-if="post.stripped_image">
 		           <q-img :src="post.stripped_image"></q-img>
-		       </q-card-section>
-
-		       <q-card-section v-if="post.stripped_video">
-			   <q-video :src="post.stripped_video" />
 		       </q-card-section>
 
 		       
@@ -99,6 +94,7 @@
      },
      data: () => {
 	 return {
+	     uploadedImage: null,
 	     newComment: '',
 	     unlikedColor: "grey",
 	     Q: null,
@@ -134,23 +130,27 @@
      methods: {
 	 CreateNewPost: async function () {
 	     const url = "/api/post/";
-	     let image = "";
-	     let video = "";
+	     
 	     const res = await fetch(url, {
 		 method: "POST",
-		 headers: { "Content-Type": "application/json" },
+		 headers: { "Content-Type": "application/json" }, 
 		 body: JSON.stringify({
 		     account: this.Profile.id,
 		     postCreator: this.Auth.userId,
 		     title: this.newPostTitle,
 		     content: this.newPostContent,
-		     image: "",
-		     video: "",
 		 })
-	     })
+		 })
 	     const json = await res.json();
 	     this.showCreatePost = false;
 	     if ("success" in json) {
+		 var data = new FormData()
+		 data.append('image', this.uploadedImage)
+		 const imageAdd = await fetch("/api/post/add/",{
+		     method: "POST",
+		     headers: { "Auth": this.Auth.refreshToken, "Post": json.post.id }, 
+		     body: data,
+		 })
 		 this.Profile.posts.push(json.post)
 	     }
 	 }, 

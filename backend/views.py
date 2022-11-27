@@ -1,14 +1,19 @@
 import json
 import jwt
+import random
+import datetime
+import string
+
 
 from django.shortcuts import render
 from rest_framework import viewsets
 from django.http import JsonResponse
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 from .models import Account, Post, Attachment, Comment
 from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer
 from replacement_twitter.settings import SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
-import datetime
 
 
 # ViewSets define the view behavior.
@@ -125,12 +130,38 @@ def add_comment(request):
     except: 
         return JsonResponse({"error": "Something went wrong.."})
 
+
+    
+# serperating out because idk?     
+# TODO add auth token to auth header
+@csrf_exempt
+def add_post_image(request):
+    print(request.FILES)
+    jwt = request.headers.get("Auth", None)
+    post_id = request.headers.get("Post", None)
+    if jwt is None:
+        return JsonResponse({"error": "Something went wrong.."})
+    try:
+        # decoded_jwt = jwt.decode(json_decoded["refresh"],SECRET_KEY, algorithms=["HS256"])
+        data = request.FILES["image"]
+        random_str = "".join(random.choice(string.ascii_letters) for i in range(30))
+        path = default_storage.save("/var/www/replacement-twitter/account-static/" + random_str, ContentFile(data.read())) 
+        post = Post.objects.filter(id=post_id).first()
+        post.image = "/var/www/replacement-twitter/account-static/" + random_str
+        post.save()
+        return JsonResponse({"success": "image added"})
+    except:
+        return JsonResponse({"error": "Something went wrong.."})
+        
+    
+    
 @csrf_exempt
 def create_post(request):
     json_decoded = json.loads(request.body)
     if json_decoded["content"] is None:
         return JsonResponse({"error": "Cannot post empty comment"})
-    try:
+    if True:
+    # try:
         account = Account.objects.filter(id=json_decoded["account"]).first()
         post_creator = Account.objects.filter(id=json_decoded["postCreator"]).first()
         if account and post_creator:
@@ -140,13 +171,12 @@ def create_post(request):
                 title=json_decoded["title"],
                 content=json_decoded["content"],
                 blog=False,
-                image=json_decoded["image"],
-                video=json_decoded["video"],
             )
             new_post.save()
             serializer = PostSerializer(new_post)
             return JsonResponse({"success": "post created", "post": serializer.data})
-    except:
+    # except:
+    else:
         return JsonResponse({"error": "Something went wrong.."})
         
     
