@@ -21,6 +21,7 @@ from backend.views import *
 
 router = routers.DefaultRouter()
 router.register(r'Account', AccountViewSet)
+router.register(r'AccountFollowing', AccountFollowingViewSet)
 router.register(r'Post', PostViewSet)
 router.register(r'Comment', CommentViewSet)
 router.register(r'Attachment', AttachmentViewSet)
@@ -34,6 +35,7 @@ urlpatterns = [
     path('api/login/', login_account),
     path('api/create/', create_account),
     path('api/account/<userName>/', render_account_profile, name='get_account_profile'),
+    path('api/account/following/<userName>/', account_following_list, name='get_account_follow_list'),
     path('api/update/', edit_account),
     path('api/like/', like_item),
     path('api/comment/', add_comment),

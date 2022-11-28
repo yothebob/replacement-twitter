@@ -8,7 +8,7 @@
 	      <h5>{{Profile.name}}</h5>
 	      <q-btn-group spread>
 		  <q-btn color="secondary" :text-color="[followed ? likedColor : unlikedColor]" label="Follow" icon="favorite" />
-		  <q-btn color="secondary" @click="" label="Following" icon="history" />
+		  <q-btn color="secondary" @click="goToFollowersPage" label="Followers" icon="history" />
 		  <q-btn v-if="Auth.userId === Profile.id" @click="editProfile = !editProfile" color="secondary" label="Edit" icon="update" />
 	      </q-btn-group>
 	      <q-btn icon="navigation" flat  @click="followAccount" />
@@ -150,6 +150,9 @@
 	 this.Auth.following.includes(this.Profile.id) ? this.followed = true : this.followed = false;
      },
      methods: {
+	 goToFollowersPage: function() {
+	     window.location.href = "/followers/" + key 
+	 },
 	 logoutUser: function () {
 	     this.Auth.clearUserSession();
 	 },

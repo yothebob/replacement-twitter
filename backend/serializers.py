@@ -76,6 +76,44 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ["id",'username', 'name', "stripped_profile_photo","stripped_background_photo", 'following', "posts", "post_color"]
 
+
+# a serializer to pass account for another accounts following list
+class AccountFollowedSerializer(serializers.ModelSerializer):
+    stripped_profile_photo = serializers.SerializerMethodField()
+    
+    def get_stripped_profile_photo(self, obj):
+        if str(obj.profile_photo) != "":
+            return str(obj.profile_photo).replace(str(BASE_DIR), "")
+        return ""
+    
+    class Meta:
+        model = Account
+        fields = ["id",'username', 'name', "stripped_profile_photo"]        
+
+        
+# a serializer to get a profile followers in alittle more detail ( for follow page )
+class AccountFollowingSerializer(serializers.ModelSerializer):
+    stripped_profile_photo = serializers.SerializerMethodField()
+    stripped_background_photo = serializers.SerializerMethodField()
+    followers = AccountFollowedSerializer(many=True, read_only=True)
+    
+    
+    def get_stripped_profile_photo(self, obj):
+        if str(obj.profile_photo) != "":
+            return str(obj.profile_photo).replace(str(BASE_DIR), "")
+        return ""
+    
+    def get_stripped_background_photo(self, obj):
+        if str(obj.background_photo) != "":
+            return str(obj.background_photo).replace(str(BASE_DIR), "")
+        return ""
+
+    class Meta:
+        model = Account
+        fields = ["id",'username', 'name', "stripped_profile_photo","stripped_background_photo", 'followers', "post_color"]        
+
+
+        
 class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Attachment

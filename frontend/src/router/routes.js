@@ -22,10 +22,10 @@ const routes = [
       ]
   },
    {
-      path: '/following/:username',
-      component: () => import('layouts/FollowingLayout.vue'),
+      path: '/followers/:username',
+      component: () => import('layouts/FollowersLayout.vue'),
       children: [
-	  { path: '/following/', component: () => import('pages/IndexPage.vue') }
+	  { path: '/followers/', component: () => import('pages/IndexPage.vue') }
       ]
   },
 

@@ -11,12 +11,17 @@ from django.http import JsonResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from .models import Account, Post, Attachment, Comment
-from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer
+from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer, AccountFollowingSerializer
 from replacement_twitter.settings import SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
 
 
 # ViewSets define the view behavior.
+
+class AccountFollowingViewSet(viewsets.ModelViewSet):
+    queryset = Account.objects.all()
+    serializer_class = AccountFollowingSerializer
+
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
@@ -35,6 +40,16 @@ class AttachmentViewSet(viewsets.ModelViewSet):
 
 #TODO switch to jwt auth for everything
 
+
+
+@csrf_exempt
+def account_following_list(request, userName):
+    account = Account.objects.filter(username=userName).first()
+    if account:
+        serializer = AccountFollowingSerializer(account)
+        return JsonResponse(serializer.data)        
+    else:
+        return JsonResponse({"error": "Something went wrong.."})        
 
 
 @csrf_exempt
