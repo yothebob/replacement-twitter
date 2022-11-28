@@ -7,6 +7,7 @@ export const useAuthStore = defineStore("auth", () => {
   const following = ref(null);
   const hasAccess = ref(false);
   const userId = ref(null);
+  const userData = ref(null);
 
   if (
     localStorage.getItem("refreshToken") &&
@@ -19,6 +20,12 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.getItem("following") !== undefined
   ) {
     following.value = JSON.parse(localStorage.getItem("following"));
+  }
+  if (
+    localStorage.getItem("userData") &&
+    localStorage.getItem("userData") !== undefined
+  ) {
+    userData.value = JSON.parse(localStorage.getItem("userData"));
   }
   if (
     localStorage.getItem("userId") &&
@@ -59,6 +66,13 @@ export const useAuthStore = defineStore("auth", () => {
     },
     { deep: true }
   );
+  watch(
+    userData,
+    (refreshVal) => {
+      localStorage.setItem("userData", JSON.stringify(refreshVal));
+    },
+    { deep: true }
+  );
 
     async function loginUser(username, password) {
     let url = "/api/login/";
@@ -77,6 +91,7 @@ export const useAuthStore = defineStore("auth", () => {
 	      this.userId = json.id;
 	      this.hasAccess = true;
 	      this.following = json.auth.following;
+	      this.userData = json.auth;
 	  }
       } else { this.hasAccess = false; }
     }
@@ -111,6 +126,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   return {
     userId,
+    userData,
     hasAccess,
     refreshToken,
     following,

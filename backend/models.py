@@ -24,6 +24,7 @@ class Account(models.Model):
     
     def __str__(self):
         return self.username
+
     
 class Post(models.Model):
     title = models.CharField(max_length=100, default="new Post")
@@ -38,15 +39,26 @@ class Post(models.Model):
     def __str__(self):
         return self.title;
     
+
+class Message(models.Model):
+    content = models.TextField(default="")
+    from_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="sent_messages")
+    to_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="messages")
+    likes = models.ManyToManyField("Account", blank=True, related_name="messages_liked")
+    
+    def __str__(self):
+        return self.content;
+
+    
 class Attachment(models.Model):
     name = models.CharField(max_length=100, default="new filename")
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    file_path = models.CharField(max_length=1000, blank=True, null=True)
+    file = models.FilePathField(max_length=500, path="/var/www/replacement-twitter/account-static", null=True, blank=True)
+    is_image = models.BooleanField(default=None, null=True)
+    is_video = models.BooleanField(default=None, null=True)
 
     def __str__(self):
         return self.name
     
-
     
 class Comment(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)

@@ -14,11 +14,18 @@ const routes = [
 	  { path: '/login/', component: () => import('pages/IndexPage.vue') }
       ]
   },
-  {
+   {
       path: '/account/:username',
       component: () => import('layouts/AccountLayout.vue'),
       children: [
 	  { path: '/account/', component: () => import('pages/IndexPage.vue') }
+      ]
+  },
+   {
+      path: '/following/:username',
+      component: () => import('layouts/FollowingLayout.vue'),
+      children: [
+	  { path: '/following/', component: () => import('pages/IndexPage.vue') }
       ]
   },
 

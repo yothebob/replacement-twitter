@@ -4,7 +4,7 @@
 	  <div>
 	      <h3>Login User</h3><br/>
 	      <q-input rounded outlined v-model="username" label="Username"/>
-	      <q-input rounded outlined v-model="password" label="Password"/>
+	      <q-input rounded outlined v-model="password" type="password" label="Password"/>
 	      <div style="display:flex;justify-contents:space-between;">
 		  <q-btn @click="loginUser" color="white" text-color="black" label="Login user" />
 		  <q-btn @click="pageType='create'" color="white" text-color="black" label="create account" />
@@ -67,7 +67,7 @@
 	 loginUser: async function () {
 	     const res = await this.Auth.loginUser(this.username, this.password)
 	     if (this.Auth.hasAccess && this.Auth.refreshToken) {
-		 window.location.href = "/account/" + this.Auth.userId ;
+		 window.location.href = "/account/" + this.Auth.userData.username ;
 	     }
 	 },
 	 createNewUser: async function () {

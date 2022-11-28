@@ -35,6 +35,18 @@ class AttachmentViewSet(viewsets.ModelViewSet):
 
 #TODO switch to jwt auth for everything
 
+
+
+@csrf_exempt
+def render_account_profile(request, userName):
+    account = Account.objects.filter(username=userName).first()
+    if account:
+        serializer = AccountSerializer(account)
+        return JsonResponse(serializer.data)        
+    else:
+        return JsonResponse({"error": "Something went wrong.."})        
+
+    
 @csrf_exempt
 def follow_account(request):
     json_decoded = json.loads(request.body)
