@@ -1,15 +1,22 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-      <div>
-	  <h3>{{Profile.username}}</h3>
-	  <h5>{{Profile.name}}</h5>
-	  <div v-for="post in Profile.posts">
-	       <div class="q-pa-md row items-start q-gutter-md">
-		   <q-card class="my-card bg-grey-1">
+    <q-layout class="flex flex-center custom-background" view="lHh Lpr lFf" v-bind:style="{ backgroundImage: 'url(' + Auth.userData.stripped_background_photo + ')' }">
+	<div style="display:flex;align-items:center;flex-direction:column;">
+	    <q-btn color="primary" label="Logout" @click="logoutUser" />
+	    <q-btn color="secondary" label="dark mode" @click="Auth.setDarkMode" />
+
+	    <div v-for="post in Feed.posts">
+	      <div class="q-pa-md row items-start q-gutter-md" >
+		  <q-card class="my-card" :style="{'color' : post.post_creator_post_color}" style="width: 450px;" >
 		       <q-card-section>
 			   <div class="text-h6">{{post.title}}</div>
-			   <div class="text-subtitle2">by {{Profile.username}}</div>
+			   <div class="text-subtitle2">by {{post.post_creator_username}}</div>
 		       </q-card-section>
+
+			   
+		       <q-card-section v-if="post.stripped_image">
+		           <q-img :src="post.stripped_image"></q-img>
+		       </q-card-section>
+
 		       
 		       <q-card-section>
 			   {{ post.content }}
@@ -18,61 +25,78 @@
 		       <q-separator dark />
 		       
 		       <q-card-actions>
-			   <q-btn @click="likeItem(Profile.id, post.id,'post',post)">{{post.liked}} {{post.likes.length}}</q-btn>
-			   <q-btn @click="post.showComments = !post.showComments" flat> Comments {{post.comments.length}}</q-btn>
+			   <q-btn @click="likeItem(Auth.userId, post.id,'post',post)" :text-color="post.liked" icon="favorite"> {{post.likes.length}}</q-btn>
+			   <q-btn @click="postShowComments(post)" flat> Comments {{post.comments.length}}</q-btn>
 		       </q-card-actions>
 
 		       <div v-if="post.showComments" >
-			   <div v-for="comment in post.comments" >
+			   <div v-for="comment in post.comments">
 			       <q-card-section>
-				   <div>
-				       <p>{{comment.account}}</p>
+				   <div class="chat-message" :style="{'background-color': comment.account_comment_color}">
+				       <p><strong>{{comment.account_username}}</strong>
+					   <q-avatar>
+					       <img size="250px" style="padding:5px; margin:5px;" :src="Auth.userData.stripped_profile_photo">
+					   </q-avatar>
+
+				       </p>
 				       <p>
 					   {{ comment.body }}
 				       </p>
+				       <q-btn flat icon="favorite" style="width:50px;" :text-color="comment.liked" @click="likeItem(Auth.userId, comment.id,'comment',comment)"> {{comment.likes.length}} </q-btn>
 				   </div>
-				   <q-btn @click="likeItem(Profile.id, comment.id,'comment',comment)" >like {{comment.likes.length}}</q-btn>
 			       </q-card-section>
 			       
 			       <q-separator dark />
-		       
+			       
 			   </div>
+			   <q-input outlined v-model="newComment" :dense="dense">
+			       <template v-slot:append>
+				   <q-avatar>
+				       <q-icon name="send" @click="submitComment(Auth.userId,post)" class="cursor-pointer" />
+				   </q-avatar>
+			       </template>
+			   </q-input>
 		       </div>
-		   </q-card>
-	       </div>
-	  </div>
+		  </q-card>
+	      </div>
+	  </div>  
       </div>
   </q-layout>
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
-
-export default defineComponent({
-     name: 'AccountLayout',
+ import { defineComponent, ref } from 'vue'
+ import { useAuthStore } from '../stores/auth';
+ 
+ export default defineComponent({
+     name: 'FeedLayout',
      
      components: {},
      data: () => {
 	 return {
 	     
-	     Profile: {},
+	     Feed: {},
 	 }
      },
      async created () {
-	 this.Profile = await this.getProfilePosts(1);
-	 this.Profile.posts.forEach((post) => {
+	 this.Auth = useAuthStore();
+	 this.Feed = await this.getProfileFeed(this.Auth.userId);
+	 this.Feed.posts.forEach((post) => {
 	     // TODO added liked here if userid in post.likes?
-	     post.likes.includes(this.Profile.id) ? post.liked = "Liked" : post.liked = "Like"  
+	     post.likes.includes(this.Auth.userId) ? post.liked = "Liked" : post.liked = "Like"  
 	     post.showComments = false;
 	 })
      },
      
      methods: {
-	 getProfilePosts: async function (key) {
-	     const url = "/api/Account/" + key + "/"
+	 getProfileFeed: async function (key) {
+	     const url = "/api/account/feed/" + key + "/"
 	     const res = await fetch(url, {
 		 method: "GET",
-		 headers: { "Content-Type": "application/json" }
+		 headers: {
+		     "Content-Type": "application/json",
+		     "Auth": this.Auth.refreshToken,
+		 }
 	     })
 	     const json = await res.json();
 	     return json;

@@ -28,6 +28,13 @@ const routes = [
 	  { path: '/followers/', component: () => import('pages/IndexPage.vue') }
       ]
   },
+   {
+      path: '/feed',
+      component: () => import('layouts/FeedLayout.vue'),
+      children: [
+	  { path: '/feed/', component: () => import('pages/IndexPage.vue') }
+      ]
+  },
 
   // Always leave this as last one,
   // but you can also remove it

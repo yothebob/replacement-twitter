@@ -63,10 +63,27 @@ def render_account_profile(request, userName):
 
     
 @csrf_exempt
+def render_account_feed(request, id):
+    pickedAccount = Account.objects.filter(id=id).first()
+    auth_jwt = request.headers.get("Auth", None)
+    try:
+        decoded_jwt =  jwt.decode(auth_jwt ,SECRET_KEY, algorithms=["HS256"])
+        if pickedAccount.id != decoded_jwt["account_id"]:
+            return JsonResponse({"error": "Something went wrong.."})        
+        if pickedAccount:
+            feed_posts = Post.objects.filter(account__in=[p.id for p in pickedAccount.following.all()]).all()
+            serializer = PostSerializer(feed_posts, many=True)
+            return JsonResponse({"posts": serializer.data})        
+    except:
+        return JsonResponse({"error": "Something went wrong.."})        
+
+    
+@csrf_exempt
 def follow_account(request):
     json_decoded = json.loads(request.body)
     account = Account.objects.filter(id=json_decoded["accountId"]).first()
     follow_account = Account.objects.filter(id=json_decoded["followAccountId"]).first()
+    print(follow_account in account.following)
     if account and follow_account:
         account.following.add(follow_account)
         account.save()
@@ -113,14 +130,14 @@ def create_account(request):
 @csrf_exempt
 def edit_account(request):
     json_decoded = json.loads(request.body)
-    jwt = request.headers.get("Auth", None)
-    decoded_jwt =  jwt.decode(json_decoded["refresh"],SECRET_KEY, algorithms=["HS256"])
+    auth_jwt = request.headers.get("Auth", None)
+    decoded_jwt =  jwt.decode(auth_jwt ,SECRET_KEY, algorithms=["HS256"])
     account = Account.objects.filter(id=decoded_jwt["account_id"]).first()
     if account is None:
         return JsonResponse({"Error": "something went wrong.."})
     for key, val in json_decoded.items():
         if val != "":
-            account.key = val
+            setattr(account, key, val)
     account.save()
     return JsonResponse({"Success": "Account updated"})
     # return JsonResponse({"Error": "something went wrong.."})
@@ -198,6 +215,24 @@ def add_comment(request):
 def add_post_image(request):
     jwt = request.headers.get("Auth", None)
     post_id = request.headers.get("Post", None)
+    if jwt is None:
+        return JsonResponse({"error": "Something went wrong.."})
+    try:
+        # decoded_jwt = jwt.decode(json_decoded["refresh"],SECRET_KEY, algorithms=["HS256"])
+        data = request.FILES["image"]
+        random_str = "".join(random.choice(string.ascii_letters) for i in range(30))
+        path = default_storage.save("/var/www/replacement-twitter/account-static/" + random_str, ContentFile(data.read())) 
+        post = Post.objects.filter(id=post_id).first()
+        post.image = "/var/www/replacement-twitter/account-static/" + random_str
+        post.save()
+        return JsonResponse({"success": "image added", "stripped_image": f"/account-static/{random_str}" })
+    except:
+        return JsonResponse({"error": "Something went wrong.."})
+
+    
+@csrf_exempt
+def add_image_attachment(request):
+    jwt = request.headers.get("Auth", None)
     if jwt is None:
         return JsonResponse({"error": "Something went wrong.."})
     try:

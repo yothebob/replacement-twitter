@@ -1,14 +1,17 @@
 import { defineStore } from "pinia";
 import { ref, watch } from "vue";
 import { computed } from "@vue/reactivity";
+import { useQuasar } from 'quasar';
 
 export const useAuthStore = defineStore("auth", () => {
-  const refreshToken = ref(null);
-  const following = ref(null);
-  const hasAccess = ref(false);
-  const userId = ref(null);
-  const userData = ref(null);
-
+    const refreshToken = ref(null);
+    const following = ref(null);
+    const hasAccess = ref(false);
+    const userId = ref(null);
+    const userData = ref(null);
+    const darkMode = ref(false);
+    const $q = useQuasar();
+    
   if (
     localStorage.getItem("refreshToken") &&
     localStorage.getItem("refreshToken") !== undefined
@@ -39,10 +42,22 @@ export const useAuthStore = defineStore("auth", () => {
   ) {
     hasAccess.value = JSON.parse(localStorage.getItem("hasAccess"));
   }
+  if (
+    localStorage.getItem("darkMode") &&
+    localStorage.getItem("darkMode") !== undefined
+  ) {
+    darkMode.value = JSON.parse(localStorage.getItem("darkMode"));
+  }
 
   watch( hasAccess,
     (hasAccessVal) => {
 	localStorage.setItem("hasAccess", JSON.stringify(hasAccessVal));
+    },
+    { deep: true }
+  );
+  watch( darkMode,
+    (darkModeVal) => {
+	localStorage.setItem("darkMode", JSON.stringify(darkModeVal));
     },
     { deep: true }
   );
@@ -74,6 +89,11 @@ export const useAuthStore = defineStore("auth", () => {
     { deep: true }
   );
 
+    function setDarkMode() {
+	this.darkMode = !this.darkMode;
+	$q.dark.set(this.darkMode);
+    }
+    
     async function loginUser(username, password) {
     let url = "/api/login/";
       const res = await fetch(url, {
@@ -133,5 +153,6 @@ export const useAuthStore = defineStore("auth", () => {
     loginUser,
     validateSession,
     clearUserSession,
+      setDarkMode,
   };
 });

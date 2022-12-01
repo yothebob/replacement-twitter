@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/login/', login_account),
     path('api/create/', create_account),
     path('api/account/<userName>/', render_account_profile, name='get_account_profile'),
+    path('api/account/feed/<id>/', render_account_feed, name='get_account_feed'),
     path('api/account/following/<userName>/', account_following_list, name='get_account_follow_list'),
     path('api/update/', edit_account),
     path('api/like/', like_item),

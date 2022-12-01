@@ -6,44 +6,49 @@
 		  <h3>{{Profile.username}}</h3>
 		  <img class="profile-photo" :src="Profile.stripped_profile_photo">
 	      <h5>{{Profile.name}}</h5>
-	      <q-btn-group spread>
-		  <q-btn color="secondary" :text-color="[followed ? likedColor : unlikedColor]" label="Follow" icon="favorite" />
-		  <q-btn color="secondary" @click="" label="Following" icon="history" />
-		  <q-btn v-if="Auth.userId === Profile.id" @click="editProfile = !editProfile" color="secondary" label="Edit" icon="update" />
+	      <q-btn-group push>
+		  <q-btn push color="secondary" :text-color="[followed ? likedColor : unlikedColor]" label="Follow" icon="favorite" />
+		  <q-btn push color="secondary" @click="" label="Followers" icon="history" />
+		  <q-btn push v-if="Auth.userId === Profile.id" @click="editProfile = !editProfile" color="secondary" label="Edit" icon="update" />
 	      </q-btn-group>
 	      <q-btn icon="navigation" flat  @click="followAccount(Profile.id)" />
 	  </div>
 	  <div v-if="editProfile" class="edit-profile">
 	      <q-input rounded outlined v-model="Profile.username" label="Username"/>
 	      <q-input rounded outlined v-model="Profile.name" label="name"/>
-	      <q-select v-model="post_color" :options="colorOptions" label="Post Color" />
+	      <q-select v-model="Profile.post_color" :options="colorOptions" label="Post Color" />
 	      <q-btn label="update" outlined  @click="updateProfile" />
 	      
 	  </div>
-	  <div class="q-pa-md" style="max-width: 350px">
+	  <div class="q-pa-md" style="width: 100%;">
 	      <q-toolbar class="bg-primary text-white shadow-2">
-		  <q-toolbar-title>Contacts</q-toolbar-title>
+		  <q-toolbar-title>Followers</q-toolbar-title>
 	      </q-toolbar>
 	      
 	      <q-list bordered>
 		  <q-item v-for="follow in Profile.followers" class="q-my-sm" clickable v-ripple>
 		      <q-item-section avatar>
-			  <q-avatar v-if="Profile.stripped_profile_photo !== ''" color="primary" text-color="white">
-			      <img size="250px" style="padding:5px; margin:5px;" :src="follow.stripped_profile_photo">
-			  </q-avatar>
-			  <q-avatar v-else color="primary" text-color="white">
-			      {{follow.username.slice(0)}}
-			  </q-avatar>
+
+			  <div v-if="follow.stripped_profile_photo !== ''" >
+			      <q-avatar color="primary" text-color="white">
+				  <img size="250px"  :src="follow.stripped_profile_photo">
+			      </q-avatar>
+			  </div>
+			  <div v-else>
+			      <q-avatar color="primary" text-color="white">
+				  {{follow.username.slice(0,1)}}
+			      </q-avatar>
+			  </div>
 		      </q-item-section>
 		      
 		      <q-item-section>
-			  <q-item-label>{{ follow.username }}</q-item-label>
-			  <q-item-label caption lines="1">{{ follow.name }}</q-item-label>
-		      </q-item-section>
-		      
-		      <q-item-section side>
+			  <a @click="goToAccount(follow.username)">
+			      <q-item-label>{{ follow.username }}</q-item-label>
+			      <q-item-label caption lines="1">{{ follow.name }}</q-item-label>
+			  </a>
 			  <q-icon :text-color="[followed ? likedColor : unlikedColor]" label="Follow" icon="favorite" @click="followAccount(follow.id)" />
 		      </q-item-section>
+		      
 		  </q-item>
 		  
 		  <q-separator />
@@ -116,12 +121,26 @@
 	 this.Auth.following.includes(this.Profile.id) ? this.followed = true : this.followed = false;
      },
      methods: {
+	 goToAccount: function (key) {
+	     window.location.href = "/account/" + key 
+	 },
 	 logoutUser: function () {
 	     this.Auth.clearUserSession();
 	 },
 
 	 updateProfile: async function () {
 	     const url = "/api/update/"
+	     const res = await fetch(url, {
+		 method: "POST",
+		 headers: { "Content-Type": "application/json",
+			    "Auth": this.Auth.refreshToken
+		 },
+		 body: JSON.stringify({
+		     username: this.Profile.username,
+		     name: this.Profile.name,
+		     post_color: this.Profile.post_color
+		 })
+	     })
 	 },
 
 	 followAccount: async function (followId) {
@@ -136,7 +155,7 @@
 	     })
 	     const json = await res.json();
 	     if ("success" in json) {
-		 this.followed ? this.followed = false : this.followed = true;
+		 /* this.followed ? this.followed = false : this.followed = true; */
 		 this.followed != this.followed
 	     }
 	 },

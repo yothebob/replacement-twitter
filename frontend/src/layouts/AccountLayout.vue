@@ -1,23 +1,24 @@
 <template >
     <q-layout class="flex flex-center custom-background" view="lHh Lpr lFf" v-bind:style="{ backgroundImage: 'url(' + Profile.stripped_background_photo + ')' }">
-      <div style="display:flex;align-items:center;flex-direction:column;">
-	  <q-btn color="primary" label="Logout" @click="logoutUser" />
-	  <div class="account-header" :style="{'background-color': this.Profile.post_color}" style="width: 100%;display:flex;align-items:center;flex-direction:column;" >
+	<div style="display:flex;align-items:center;flex-direction:column;">
+	    <q-btn color="primary" label="Logout" @click="logoutUser" />
+	    <q-btn color="secondary" label="dark mode" @click="Auth.setDarkMode" />
+	    <div class="account-header" :style="{'background-color': this.Profile.post_color}" style="width: 100%;display:flex;align-items:center;flex-direction:column;" >
 		  <h3>{{Profile.username}}</h3>
 		  <img class="profile-photo" :src="Profile.stripped_profile_photo">
 	      <h5>{{Profile.name}}</h5>
-	      <q-btn-group spread>
-		  <q-btn color="secondary" :text-color="[followed ? likedColor : unlikedColor]" label="Follow" icon="favorite" />
-		  <q-btn color="secondary" @click="goToFollowersPage" label="Followers" icon="history" />
-		  <q-btn v-if="Auth.userId === Profile.id" @click="editProfile = !editProfile" color="secondary" label="Edit" icon="update" />
+	      <q-btn-group push>
+		  <q-btn push color="secondary" :text-color="[followed ? likedColor : unlikedColor]" label="Follow" icon="favorite" />
+		  <q-btn push color="secondary" @click="goToFollowersPage" label="Followers" icon="history" />
+		  <q-btn push v-if="Auth.userId === Profile.id" @click="editProfile = !editProfile" color="secondary" label="Edit" icon="update" />
 	      </q-btn-group>
 	      <q-btn icon="navigation" flat  @click="followAccount" />
 	  </div>
 	  <div v-if="editProfile" class="edit-profile">
 	      <q-input rounded outlined v-model="Profile.username" label="Username"/>
 	      <q-input rounded outlined v-model="Profile.name" label="name"/>
-	      <q-select v-model="post_color" :options="colorOptions" label="Post Color" />
-	      <q-btn label="update" outlined  @click="updateProfile" />
+	      <q-select v-model="Profile.post_color" :options="colorOptions" label="Post Color" />
+	      <q-btn label="Update" outlined  @click="updateProfile" />
 	      
 	  </div>
 	  <div class="create-post">
@@ -95,27 +96,21 @@
 
 <script>
  import { defineComponent, ref } from 'vue'
- import { useQuasar } from 'quasar'
  import { useAuthStore } from '../stores/auth';
  
  export default defineComponent({
      name: 'AccountLayout',
      components: {},
      setup () {
-	 const $q = useQuasar()
-	 $q.dark.set(true)
      },
      data: () => {
 	 return {
 	     uploadedImage: null,
 	     newComment: '',
 	     unlikedColor: "grey",
-	     Q: null,
-	     darkMode: false,
 	     likedColor: "red",
 	     Profile: {},
 	     Auth: null,
-	     darkMode: false,
 	     followed: false,
 	     showCreatePost: false,
 	     newPostTitle: "",
@@ -151,7 +146,7 @@
      },
      methods: {
 	 goToFollowersPage: function() {
-	     window.location.href = "/followers/" + key 
+	     window.location.href = "/followers/" + this.Profile.username 
 	 },
 	 logoutUser: function () {
 	     this.Auth.clearUserSession();
@@ -159,6 +154,17 @@
 	 updateProfile: async function () {
 	     console.log("work")
 	     const url = "/api/update/"
+	     const res = await fetch(url, {
+		 method: "POST",
+		 headers: { "Content-Type": "application/json",
+			    "Auth": this.Auth.refreshToken
+		 },
+		 body: JSON.stringify({
+		     username: this.Profile.username,
+		     name: this.Profile.name,
+		     post_color: this.Profile.post_color
+		 })
+	     })
 	 },
 	 CreateNewPost: async function () {
 	     const url = "/api/post/";
