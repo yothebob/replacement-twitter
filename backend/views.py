@@ -12,6 +12,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from .models import Account, Post, Attachment, Comment
 from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer, AccountFollowingSerializer
+from .utils import encrypt
 from replacement_twitter.settings import SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
 
@@ -114,11 +115,11 @@ def validate_login(request):
 @csrf_exempt
 def create_account(request):
     json_decoded = json.loads(request.body)
-    found_account = Account.objects.filter(username=json_decoded["username"], password=json_decoded["password"]).first()
+    found_account = Account.objects.filter(username=json_decoded["username"], password=encrpyt(json_decoded["password"])).first()
     if found_account is None:
         new_account = Account(
             username=json_decoded["username"],
-            password=json_decoded["password"],
+            password=encrypt(json_decoded["password"]),
             name=json_decoded["name"],
             post_color=json_decoded["postColor"],
         )
@@ -229,20 +230,39 @@ def add_post_image(request):
     except:
         return JsonResponse({"error": "Something went wrong.."})
 
+
     
 @csrf_exempt
 def add_image_attachment(request):
     jwt = request.headers.get("Auth", None)
+    mtype = request.headers.get("type", None)
+    typeId = request.headers.get("id", None)
+
     if jwt is None:
         return JsonResponse({"error": "Something went wrong.."})
     try:
         # decoded_jwt = jwt.decode(json_decoded["refresh"],SECRET_KEY, algorithms=["HS256"])
-        data = request.FILES["image"]
-        random_str = "".join(random.choice(string.ascii_letters) for i in range(30))
-        path = default_storage.save("/var/www/replacement-twitter/account-static/" + random_str, ContentFile(data.read())) 
-        post = Post.objects.filter(id=post_id).first()
-        post.image = "/var/www/replacement-twitter/account-static/" + random_str
-        post.save()
+        if mtype in ("post", "background", "profile", "message"):
+            data = request.FILES["image"]
+            random_str = "".join(random.choice(string.ascii_letters) for i in range(50))
+            path = default_storage.save("/var/www/replacement-twitter/account-static/" + random_str, ContentFile(data.read())) 
+            if mtype == "post":
+                post = Post.objects.filter(id=typeId).first()
+                post.image = "/var/www/replacement-twitter/account-static/" + random_str
+                post.save()
+            elif mtype == "background":
+                new_background = Account.objects.filter(id=typeId).first()
+                new_background.background_photo = "/var/www/replacement-twitter/account-static/" + random_str
+                new_background.save()
+            elif mtype == "profile":
+                profile_image = Account.objects.filter(id=typeId).first()
+                profile_image.profile_photo = "/var/www/replacement-twitter/account-static/" + random_str
+                profile_image.save()
+            elif mtype == "message":
+                message_image = Message.objects.filter(id=typeId).first()
+                message_image.image = "/var/www/replacement-twitter/account-static/" + random_str
+                message_image.save()
+
         return JsonResponse({"success": "image added", "stripped_image": f"/account-static/{random_str}" })
     except:
         return JsonResponse({"error": "Something went wrong.."})

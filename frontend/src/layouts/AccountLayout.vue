@@ -166,6 +166,37 @@
 		 })
 	     })
 	 },
+
+	 updateProfilePhoto: async function () {
+	     var data = new FormData()
+	     data.append('image', this.uploadedImage)
+	     const res = await fetch("/api/image/add/",{
+		 method: "POST",
+		 headers: { "Auth": this.Auth.refreshToken,
+			    "type": "profile",
+			    "id": this.Auth.userId 
+		 }, 
+		 body: data,
+	     })
+	     const j = await imageAdd.json()
+	     this.Profile.stripped_profile_photo = j.stripped_image
+	 },
+
+	 updateBackgroundPhoto: async function () {
+	     var data = new FormData()
+	     data.append('image', this.uploadedImage)
+	     const res = await fetch("/api/image/add/",{
+		 method: "POST",
+		 headers: { "Auth": this.Auth.refreshToken,
+			    "type": "background",
+			    "id": this.Auth.userId 
+		 }, 
+		 body: data,
+	     })
+	     const j = await imageAdd.json()
+	     this.Profile.stripped_background_photo = j.stripped_image
+	 },
+	 
 	 CreateNewPost: async function () {
 	     const url = "/api/post/";
 	     
@@ -184,9 +215,12 @@
 	     if ("success" in json) {
 		 var data = new FormData()
 		 data.append('image', this.uploadedImage)
-		 const imageAdd = await fetch("/api/post/add/",{
+		 const imageAdd = await fetch("/api/image/add/",{
 		     method: "POST",
-		     headers: { "Auth": this.Auth.refreshToken, "Post": json.post.id }, 
+		     headers: { "Auth": this.Auth.refreshToken,
+				"type": "post",
+				"id": json.post.id 
+		     }, 
 		     body: data,
 		 })
 		 const j = await imageAdd.json()

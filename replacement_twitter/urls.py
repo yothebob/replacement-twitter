@@ -43,6 +43,7 @@ urlpatterns = [
     path('api/follow/', follow_account),
     path('api/post/', create_post),
     path('api/post/add/', add_post_image),
+    path('api/image/add/', add_image_attachment),
     path('api/validate/', validate_login),
 ]
     
