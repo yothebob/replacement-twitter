@@ -19,7 +19,23 @@
 	      <q-input rounded outlined v-model="Profile.name" label="name"/>
 	      <q-select v-model="Profile.post_color" :options="colorOptions" label="Post Color" />
 	      <q-btn label="Update" outlined  @click="updateProfile" />
-	      
+	      <div>
+		   <q-file outlined v-model="uploadedImage">
+		       <template v-slot:prepend>
+			   <q-icon name="attach_file" />
+		       </template>
+		   </q-file>
+		   <q-btn label="Background Image update" outlined  @click="updateBackgroundPhoto" />
+	      </div>
+	      <div>
+		  <q-file outlined v-model="uploadedImage">
+		      <template v-slot:prepend>
+			  <q-icon name="attach_file" />
+		      </template>
+		  </q-file>
+		  <q-btn label="Profile Image update" outlined  @click="updateProfilePhoto" />
+
+	      </div>
 	  </div>
 	  <div class="create-post">
 		  <q-btn label="Create Post" flat  @click="showCreatePost = !showCreatePost" />
@@ -43,7 +59,7 @@
 		       </q-card-section>
 
 			   
-		       <q-card-section v-if="post.stripped_image">
+		       <q-card-section v-if="post.stripped_image !== 'None' || post.stripped_image !== ''">
 		           <q-img :src="post.stripped_image"></q-img>
 		       </q-card-section>
 

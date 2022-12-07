@@ -18,10 +18,10 @@ from django.urls import path, include
 from django.contrib.auth.models import User
 from rest_framework import routers
 from backend.views import *
+from backend.serializers import AccountFollowingSerializer
 
 router = routers.DefaultRouter()
 router.register(r'Account', AccountViewSet)
-router.register(r'AccountFollowing', AccountFollowingViewSet)
 router.register(r'Post', PostViewSet)
 router.register(r'Comment', CommentViewSet)
 router.register(r'Attachment', AttachmentViewSet)
@@ -38,6 +38,7 @@ urlpatterns = [
     path('api/account/feed/<id>/', render_account_feed, name='get_account_feed'),
     path('api/account/following/<userName>/', account_following_list, name='get_account_follow_list'),
     path('api/update/', edit_account),
+    path('api/accountFollowing/',AccountFollowingSerializer ),
     path('api/like/', like_item),
     path('api/comment/', add_comment),
     path('api/follow/', follow_account),

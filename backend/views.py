@@ -13,7 +13,7 @@ from django.core.files.base import ContentFile
 from .models import Account, Post, Attachment, Comment
 from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer, AccountFollowingSerializer
 from .utils import encrypt
-from replacement_twitter.settings import SECRET_KEY
+from replacement_twitter.settings import SECRET_BYTE_KEY, SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -84,7 +84,6 @@ def follow_account(request):
     json_decoded = json.loads(request.body)
     account = Account.objects.filter(id=json_decoded["accountId"]).first()
     follow_account = Account.objects.filter(id=json_decoded["followAccountId"]).first()
-    print(follow_account in account.following)
     if account and follow_account:
         account.following.add(follow_account)
         account.save()
@@ -115,7 +114,7 @@ def validate_login(request):
 @csrf_exempt
 def create_account(request):
     json_decoded = json.loads(request.body)
-    found_account = Account.objects.filter(username=json_decoded["username"], password=encrpyt(json_decoded["password"])).first()
+    found_account = Account.objects.filter(username=json_decoded["username"], password=encrypt(json_decoded["password"])).first()
     if found_account is None:
         new_account = Account(
             username=json_decoded["username"],
@@ -147,16 +146,17 @@ def edit_account(request):
 @csrf_exempt
 def login_account(request):
     json_decoded = json.loads(request.body)
-    found_account = Account.objects.filter(username=json_decoded["username"], password=json_decoded["password"]).first()
+    found_account = Account.objects.filter(username=json_decoded["username"], password=encrypt(json_decoded["password"])).first()
     expiring = (datetime.datetime.now() + datetime.timedelta(days=1)) 
     if found_account is not None:
         refresh = jwt.encode({
             "token_type": "refresh",
             "username": found_account.username,
-            "password": found_account.password,
+            "password": encrypt(found_account.password),
             "account_id": found_account.id,
             "expire_at": expiring.strftime("%Y-%m-%d %H:%M:%S"),
-        }, SECRET_KEY , algorithm="HS256")
+        },
+        SECRET_KEY , algorithm="HS256")
         serializer = AccountSerializer(found_account)
         return JsonResponse({ "refresh": refresh , "id": found_account.id, "auth": serializer.data})
     return JsonResponse({"error": "not authenticated"})
@@ -240,7 +240,8 @@ def add_image_attachment(request):
 
     if jwt is None:
         return JsonResponse({"error": "Something went wrong.."})
-    try:
+    # try:
+    if True:
         # decoded_jwt = jwt.decode(json_decoded["refresh"],SECRET_KEY, algorithms=["HS256"])
         if mtype in ("post", "background", "profile", "message"):
             data = request.FILES["image"]
@@ -248,23 +249,43 @@ def add_image_attachment(request):
             path = default_storage.save("/var/www/replacement-twitter/account-static/" + random_str, ContentFile(data.read())) 
             if mtype == "post":
                 post = Post.objects.filter(id=typeId).first()
-                post.image = "/var/www/replacement-twitter/account-static/" + random_str
+                new_attach = Attachment(
+                    file="/var/www/replacement-twitter/account-static/" + random_str,
+                    name=random_str,
+                    is_image=True)
+                post.image = new_attach
+                new_attach.save()
                 post.save()
             elif mtype == "background":
                 new_background = Account.objects.filter(id=typeId).first()
-                new_background.background_photo = "/var/www/replacement-twitter/account-static/" + random_str
+                new_attach = Attachment(
+                    file="/var/www/replacement-twitter/account-static/" + random_str,
+                    name=random_str,
+                    is_image=True)
+                new_background.background_photo = new_attach
+                new_attach.save()
                 new_background.save()
             elif mtype == "profile":
                 profile_image = Account.objects.filter(id=typeId).first()
-                profile_image.profile_photo = "/var/www/replacement-twitter/account-static/" + random_str
+                new_attach = Attachment(
+                    file="/var/www/replacement-twitter/account-static/" + random_str,
+                    name=random_str,
+                    is_image=True)
+                profile_image.profile_photo = new_attach
+                new_attach.save()
                 profile_image.save()
             elif mtype == "message":
                 message_image = Message.objects.filter(id=typeId).first()
-                message_image.image = "/var/www/replacement-twitter/account-static/" + random_str
+                new_attach = Attachment(
+                    file="/var/www/replacement-twitter/account-static/" + random_str,
+                    name=random_str,
+                    is_image=True)
+                message_image.image = new_attach
+                new_attach.save()
                 message_image.save()
 
         return JsonResponse({"success": "image added", "stripped_image": f"/account-static/{random_str}" })
-    except:
+    else:
         return JsonResponse({"error": "Something went wrong.."})
         
     

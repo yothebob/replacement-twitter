@@ -13,7 +13,7 @@
 		       </q-card-section>
 
 			   
-		       <q-card-section v-if="post.stripped_image">
+		       <q-card-section v-if="post.stripped_image != 'None' || post.stripped_image != ''">
 		           <q-img :src="post.stripped_image"></q-img>
 		       </q-card-section>
 

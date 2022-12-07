@@ -29,7 +29,7 @@
 		  <q-item v-for="follow in Profile.followers" class="q-my-sm" clickable v-ripple>
 		      <q-item-section avatar>
 
-			  <div v-if="follow.stripped_profile_photo !== ''" >
+			  <div v-if="follow.stripped_profile_photo !== '' || follow.stripped_profile_photo !== 'None'" >
 			      <q-avatar color="primary" text-color="white">
 				  <img size="250px"  :src="follow.stripped_profile_photo">
 			      </q-avatar>

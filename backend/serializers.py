@@ -42,7 +42,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_stripped_image(self, obj):
         if str(obj.image) != "":
-            return str(obj.image).replace(str(BASE_DIR), "")
+            return "/account-static/" + str(obj.image)
         return ""
 
     def get_account_post_color(self, obj):
@@ -64,12 +64,12 @@ class AccountSerializer(serializers.ModelSerializer):
     
     def get_stripped_profile_photo(self, obj):
         if str(obj.profile_photo) != "":
-            return str(obj.profile_photo).replace(str(BASE_DIR), "")
+            return "/account-static/" + str(obj.profile_photo)
         return ""
     
     def get_stripped_background_photo(self, obj):
         if str(obj.background_photo) != "":
-            return str(obj.background_photo).replace(str(BASE_DIR), "")
+            return "/account-static/" + str(obj.background_photo)
         return ""
 
     class Meta:
@@ -100,12 +100,12 @@ class AccountFollowingSerializer(serializers.ModelSerializer):
     
     def get_stripped_profile_photo(self, obj):
         if str(obj.profile_photo) != "":
-            return str(obj.profile_photo).replace(str(BASE_DIR), "")
+            return "/account-static/" + str(obj.profile_photo)
         return ""
     
     def get_stripped_background_photo(self, obj):
         if str(obj.background_photo) != "":
-            return str(obj.background_photo).replace(str(BASE_DIR), "")
+            return "/account-static/" + str(obj.background_photo)
         return ""
 
     class Meta:
