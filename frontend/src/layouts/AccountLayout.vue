@@ -1,20 +1,23 @@
 <template >
     <q-layout class="flex flex-center custom-background" view="lHh Lpr lFf" v-bind:style="{ backgroundImage: 'url(' + Profile.stripped_background_photo + ')' }">
 	<div style="display:flex;align-items:center;flex-direction:column;">
-	    <q-btn color="primary" label="Logout" @click="logoutUser" />
-	    <q-btn color="secondary" label="dark mode" @click="Auth.setDarkMode" />
-	    <div class="account-header" :style="{'background-color': this.Profile.post_color}" style="width: 100%;display:flex;align-items:center;flex-direction:column;" >
-		  <h3>{{Profile.username}}</h3>
-		  <img class="profile-photo" :src="Profile.stripped_profile_photo">
-	      <h5>{{Profile.name}}</h5>
-	      <q-btn-group push>
-		  <q-btn push color="secondary" :text-color="[followed ? likedColor : unlikedColor]" label="Follow" icon="favorite" />
-		  <q-btn push color="secondary" @click="goToFollowersPage" label="Followers" icon="history" />
-		  <q-btn push v-if="Auth.userId === Profile.id" @click="editProfile = !editProfile" color="secondary" label="Edit" icon="update" />
-	      </q-btn-group>
-	      <q-btn icon="navigation" flat  @click="followAccount" />
-	  </div>
-	  <div v-if="editProfile" class="edit-profile">
+
+	    <Header
+		:logout="logoutuser"
+		:dark="Auth.setDarkMode"
+	    ></Header>
+	    <ProfileHeader
+		:username="Profile.username"
+		:backgroundColor="Profile.post_color"
+		:name="Profile.name"
+		:profilePhoto="Profile.stripped_profile_photo"
+		:followColor="[followed ? likedColor : unlikedColor]"
+		:goToFollowersPage="goToFollowersPage"
+		:followAccount="followAccount"
+		:editProfile="editProfile"
+		:canEdit="[Auth.userId === Profile.id]"
+	    ></ProfileHeader>
+	    <div v-if="editProfile" class="edit-profile">
 	      <q-input rounded outlined v-model="Profile.username" label="Username"/>
 	      <q-input rounded outlined v-model="Profile.name" label="name"/>
 	      <q-select v-model="Profile.post_color" :options="colorOptions" label="Post Color" />
@@ -113,10 +116,15 @@
 <script>
  import { defineComponent, ref } from 'vue'
  import { useAuthStore } from '../stores/auth';
+ import  Header from '../components/Header.vue';
+ import  ProfileHeader from '../components/ProfileHeader.vue';
  
  export default defineComponent({
      name: 'AccountLayout',
-     components: {},
+     components: {
+	 Header,
+	 ProfileHeader
+     },
      setup () {
      },
      data: () => {
