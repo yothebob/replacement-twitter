@@ -1,12 +1,16 @@
 <template >
     <q-layout class="flex flex-center custom-background" view="lHh Lpr lFf" v-bind:style="{ backgroundImage: 'url(' + Profile.stripped_background_photo + ')' }">
 	<div style="display:flex;align-items:center;flex-direction:column;">
-
-	    <Header
+	    <NewHeader
+		:backgroundColor="Profile.post_color"
 		:logout="logoutuser"
 		:dark="Auth.setDarkMode"
-	    ></Header>
+		:profileLink="`/account/${Profile.username}`"
+		feedLink="/feed"
+		imageLink="/images"
+	    ></NewHeader>
 	    <ProfileHeader
+		style="margin-top:6rem;"
 		:username="Profile.username"
 		:backgroundColor="Profile.post_color"
 		:name="Profile.name"
@@ -117,12 +121,15 @@
  import { defineComponent, ref } from 'vue'
  import { useAuthStore } from '../stores/auth';
  import  Header from '../components/Header.vue';
+ import  NewHeader from '../components/NewHeader.vue';
  import  ProfileHeader from '../components/ProfileHeader.vue';
+
  
  export default defineComponent({
      name: 'AccountLayout',
      components: {
 	 Header,
+	 NewHeader,
 	 ProfileHeader
      },
      setup () {
@@ -158,7 +165,6 @@
 	 if (this.Auth.hasAccess == false) {
 	     window.location.href = "/login/";
 	 }
-	 console.log(this.$route.params.username);
 	 this.Profile = await this.getProfilePosts(this.$route.params.username);
 	 this.Profile.posts.forEach((post) => {
 	     // TODO added liked here if userid in post.likes?

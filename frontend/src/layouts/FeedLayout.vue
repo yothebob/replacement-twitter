@@ -1,9 +1,15 @@
 <template>
     <q-layout class="flex flex-center custom-background" view="lHh Lpr lFf" v-bind:style="{ backgroundImage: 'url(' + Auth.userData.stripped_background_photo + ')' }">
 	<div style="display:flex;align-items:center;flex-direction:column;">
-	    <q-btn color="primary" label="Logout" @click="logoutUser" />
-	    <q-btn color="secondary" label="dark mode" @click="Auth.setDarkMode" />
-
+	    <NewHeader
+		:backgroundColor="Auth.userData.post_color"
+		:logout="logoutuser"
+		:dark="Auth.setDarkMode"
+		:profileLink="`/account/${Auth.userData.username}`"
+		feedLink="/feed"
+		imageLink="/images"
+	    ></NewHeader>
+	    <div style="display:flex;justify-content:space-around;"><h3>{{Auth.userData.username}}'s Feed</h3></div>
 	    <div v-for="post in Feed.posts">
 	      <div class="q-pa-md row items-start q-gutter-md" >
 		  <q-card class="my-card" :style="{'color' : post.post_creator_post_color}" style="width: 450px;" >
@@ -67,11 +73,12 @@
 <script>
  import { defineComponent, ref } from 'vue'
  import { useAuthStore } from '../stores/auth';
+ import  NewHeader from '../components/NewHeader.vue';
  
  export default defineComponent({
      name: 'FeedLayout',
      
-     components: {},
+     components: { NewHeader },
      data: () => {
 	 return {
 	     
