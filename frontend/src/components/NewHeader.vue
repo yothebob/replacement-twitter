@@ -29,6 +29,11 @@
 	 type: String,
 	 default: "/images",
 	 description: "image link"
+     },
+     chatLink: {
+	 type: String,
+	 default: "/chatrooms",
+	 description: "chatroom link"
      }
  });
 </script>
@@ -41,6 +46,7 @@
 		<q-btn name="Feed" label="Feed" @click="router.push({path : feedLink })" />
 		<q-btn name="Profile" label="Profile" @click="router.push({path : profileLink })" />
 		<q-btn name="Images" label="Images" @click="router.push({path : imageLink})" />
+		<q-btn name="Chatrooms" label="Chatrooms" @click="router.push({path : chatLink})" />
 	    </div>
 	</q-toolbar>
     </q-header>

@@ -35,6 +35,20 @@ const routes = [
 	  { path: '/feed/', component: () => import('pages/IndexPage.vue') }
       ]
   },
+   {
+       path: '/message/:chatroom',
+      component: () => import('layouts/MessagingLayout.vue'),
+      children: [
+	  { path: '/message/:chatroom/', component: () => import('pages/IndexPage.vue') }
+      ]
+  },
+   {
+       path: '/chatrooms',
+      component: () => import('layouts/ChatroomsLayout.vue'),
+      children: [
+	  { path: '/chatrooms', component: () => import('pages/IndexPage.vue') }
+      ]
+  },
 
   // Always leave this as last one,
   // but you can also remove it

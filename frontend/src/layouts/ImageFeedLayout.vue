@@ -8,6 +8,7 @@
 		:profileLink="`/account/${Auth.userData.username}`"
 		feedLink="/feed"
 		imageLink="/images"
+		chatLink="/chatrooms"
 	    ></NewHeader>
 	    <div style="display:flex;justify-content:space-around;"><h3>{{Auth.userData.username}}'s Feed</h3></div>
 	    <div v-for="post in Feed.posts">

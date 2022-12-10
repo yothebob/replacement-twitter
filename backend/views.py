@@ -10,14 +10,18 @@ from rest_framework import viewsets
 from django.http import JsonResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from .models import Account, Post, Attachment, Comment
-from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer, AccountFollowingSerializer
+from .models import Account, Post, Attachment, Comment, Chatroom
+from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer, AccountFollowingSerializer, ChatroomSerializer
 from .utils import encrypt
 from replacement_twitter.settings import SECRET_BYTE_KEY, SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
 
 
 # ViewSets define the view behavior.
+
+class ChatroomViewSet(viewsets.ModelViewSet):
+    queryset = Chatroom.objects.all()
+    serializer_class = AccountFollowingSerializer
 
 class AccountFollowingViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()

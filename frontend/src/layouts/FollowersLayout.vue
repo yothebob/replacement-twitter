@@ -8,6 +8,7 @@
 		:profileLink="`/account/${Auth.userData.username}`"
 		feedLink="/feed"
 		imageLink="/images"
+		chatLink="/chatrooms"
 	    ></NewHeader>
 	    <ProfileHeader
 		style="margin-top:6rem;"

@@ -21,6 +21,7 @@ from backend.views import *
 from backend.serializers import AccountFollowingSerializer
 
 router = routers.DefaultRouter()
+router.register(r'Chatroom', ChatroomViewSet)
 router.register(r'Account', AccountViewSet)
 router.register(r'Post', PostViewSet)
 router.register(r'Comment', CommentViewSet)

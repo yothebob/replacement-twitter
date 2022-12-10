@@ -115,6 +115,16 @@ class AccountFollowingSerializer(serializers.ModelSerializer):
 
 
         
+class ChatroomSerializer(serializers.HyperlinkedModelSerializer):
+    timeCreated = serializers.CharField(source="created")
+    chatroom_messages = MessageSerializer(many=True, read_only=True)
+    chatroom_accounts = AccountSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Attachment
+        fields = ['timeCreated', 'post', 'name', 'chatroom_accounts', 'chatroom_messages']
+
+        
 class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
     timeCreated = serializers.CharField(source="created")
     class Meta:
@@ -122,11 +132,26 @@ class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', "timeCreated", 'post', 'name', 'file_path']
 
 
-# class userPostsSerializer(serializers.HyperlinkedModelSerializer):
+class MessageSerializer(serializers.HyperlinkedModelSerializer):
+    timeCreated = serializers.CharField(source="created")
+    # from_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="sent_messages")
+    # to_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="messages")
+    likes = models.ManyToManyField("Account", blank=True, related_name="messages_liked")
+    stripped_image = serializers.SerializerMethodField()
+    stripped_video = serializers.SerializerMethodField()
+
+    def get_stripped_image(self, obj):
+        if obj.image:
+            return ACCOUNT_STATIC_ROOT + str(obj.image)
+        return ""
+
+    def get_stripped_video(self, obj):
+        if obj.video:
+            return ACCOUNT_STATIC_ROOT + str(obj.video)
+        return ""
     
     
-#     class Meta:
-#         model = Account
-#         fields = [
-            
-#         ]
+    class Meta:
+        model = Attachment
+        fields = ["timeCreated", 'content', 'name', 'from_account', 'to_account', 'likes', "stripped_image", "stripped_video"]
+

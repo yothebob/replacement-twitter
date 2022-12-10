@@ -64,9 +64,19 @@ class Message(models.Model):
     to_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="messages")
     likes = models.ManyToManyField("Account", blank=True, related_name="messages_liked")
     image = models.ForeignKey(Attachment, on_delete=models.CASCADE, default=None, null=True, related_name="message_image")
+    video = models.ForeignKey(Attachment, on_delete=models.CASCADE, default=None, null=True, related_name="message_video")
 
     def __str__(self):
         return self.content;
+
+class Chatroom(models.Model):
+    created = models.DateTimeField(default=datetime.datetime.now())
+    name = models.CharField(max_length=100, default="ChatRoom")
+    messages = models.ManyToManyField("Message", blank=True, related_name="chatroom_messages")
+    accounts = models.ManyToManyField("Account", blank=True, related_name="chatroom_accounts")
+    
+    def __str__(self):
+        return self.name;
 
     
     
