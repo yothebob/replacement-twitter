@@ -10,8 +10,8 @@ from rest_framework import viewsets
 from django.http import JsonResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from .models import Account, Post, Attachment, Comment, Chatroom
-from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer, AccountFollowingSerializer, ChatroomSerializer
+from .models import Account, Post, Attachment, Comment, Chatroom, Message
+from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer, AccountFollowingSerializer, ChatroomSerializer, MessageSerializer
 from .utils import encrypt
 from replacement_twitter.settings import SECRET_BYTE_KEY, SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
@@ -19,9 +19,13 @@ from django.views.decorators.csrf import csrf_exempt
 
 # ViewSets define the view behavior.
 
+class MessageViewSet(viewsets.ModelViewSet):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
 class ChatroomViewSet(viewsets.ModelViewSet):
     queryset = Chatroom.objects.all()
-    serializer_class = AccountFollowingSerializer
+    serializer_class = ChatroomSerializer
 
 class AccountFollowingViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
@@ -46,6 +50,16 @@ class AttachmentViewSet(viewsets.ModelViewSet):
 #TODO switch to jwt auth for everything
 
 
+
+@csrf_exempt
+def account_chatrooms_list(request):
+    auth_jwt = request.headers.get("Auth", None)
+    decoded_jwt =  jwt.decode(auth_jwt ,SECRET_KEY, algorithms=["HS256"])
+    pickedAccount = Account.objects.filter(id=decoded_jwt["account_id"]).first()
+    if pickedAccount:
+        chatrooms = Account.chatroom_accounts.all()
+        return JsonResponse({"test":chatrooms})
+    return JsonResponse({"error": "Something went wrong... " })
 
 # @csrf_exempt
 # def account_image_list(request, userName):

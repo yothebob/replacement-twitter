@@ -15,9 +15,9 @@
 	    <div>
 		<q-btn label="Create New Chatroom" @click="" />
 	    </div>
-	    <div v-if="Profile.chatRooms">
+	    <div v-if="chatRooms">
 		<q-list bordered>
-		<div v-for="room in Profile.chatRooms">
+		<div v-for="room in chatRooms">
 		    <q-item @click="enterChatRoom(room)" clickable v-ripple>
 
 			<q-item-section>
@@ -60,28 +60,28 @@
  import  NewHeader from '../components/NewHeader.vue';
  
  export default defineComponent({
-     name: 'FeedLayout',
+     name: 'ChatroomsLayout',
      
      components: { NewHeader },
      data: () => {
 	 return {
 	     
-	     Feed: {},
+	     chatRooms: {},
 	 }
      },
      async created () {
 	 this.Auth = useAuthStore();
-	 this.Feed = await this.getProfileFeed(this.Auth.userId);
-	 this.Feed.posts.forEach((post) => {
-	     // TODO added liked here if userid in post.likes?
-	     post.likes.includes(this.Auth.userId) ? post.liked = "Liked" : post.liked = "Like"  
-	     post.showComments = false;
-	 })
+	 this.chatRooms = await this.getChatRooms(this.Auth.userId);
+	 /* this.Feed.posts.forEach((post) => {
+	    // TODO added liked here if userid in post.likes?
+	    post.likes.includes(this.Auth.userId) ? post.liked = "Liked" : post.liked = "Like"  
+	    post.showComments = false;
+	    }) */
      },
      
      methods: {
-	 getProfileFeed: async function (key) {
-	     const url = "/api/account/feed/" + key + "/"
+	 getChatRooms: async function (key) {
+	     const url = "/api/chatrooms" + "/"
 	     const res = await fetch(url, {
 		 method: "GET",
 		 headers: {

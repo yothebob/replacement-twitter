@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework import routers, serializers, viewsets
-from .models import Account, Post, Attachment, Comment
+from .models import Account, Post, Attachment, Comment, Message, Chatroom
 from replacement_twitter.settings import ACCOUNT_STATIC_ROOT
 
 
@@ -113,30 +113,19 @@ class AccountFollowingSerializer(serializers.ModelSerializer):
         model = Account
         fields = ["id",'username', 'name', "stripped_profile_photo","stripped_background_photo", 'followers', "post_color"]        
 
-
-        
-class ChatroomSerializer(serializers.HyperlinkedModelSerializer):
-    timeCreated = serializers.CharField(source="created")
-    chatroom_messages = MessageSerializer(many=True, read_only=True)
-    chatroom_accounts = AccountSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Attachment
-        fields = ['timeCreated', 'post', 'name', 'chatroom_accounts', 'chatroom_messages']
-
         
 class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
     timeCreated = serializers.CharField(source="created")
     class Meta:
         model = Attachment
-        fields = ['url', "timeCreated", 'post', 'name', 'file_path']
+        fields = ["id", 'url', "timeCreated", 'post', 'name', 'file_path']
 
-
+        
 class MessageSerializer(serializers.HyperlinkedModelSerializer):
     timeCreated = serializers.CharField(source="created")
-    # from_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="sent_messages")
-    # to_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="messages")
-    likes = models.ManyToManyField("Account", blank=True, related_name="messages_liked")
+    fromAccount = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())
+    chatroomId = serializers.PrimaryKeyRelatedField(queryset=Chatroom.objects.all())
+    messages_liked = AccountSerializer(many=True, read_only=True)
     stripped_image = serializers.SerializerMethodField()
     stripped_video = serializers.SerializerMethodField()
 
@@ -152,6 +141,15 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
     
     
     class Meta:
-        model = Attachment
-        fields = ["timeCreated", 'content', 'name', 'from_account', 'to_account', 'likes', "stripped_image", "stripped_video"]
+        model = Message
+        fields = ["id", "timeCreated", 'content', 'fromAccount', 'chatroomId', 'messages_liked', "stripped_image", "stripped_video"]
 
+        
+class ChatroomSerializer(serializers.HyperlinkedModelSerializer):
+    timeCreated = serializers.CharField(source="created")
+    chatroom_messages = MessageSerializer(many=True, read_only=True)
+    chatroom_accounts = AccountSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Chatroom
+        fields = ["id", 'timeCreated', 'name', 'chatroom_accounts', 'chatroom_messages']

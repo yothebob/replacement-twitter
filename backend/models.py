@@ -61,10 +61,10 @@ class Message(models.Model):
     created = models.DateTimeField(default=datetime.datetime.now())
     content = models.TextField(default="")
     from_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="sent_messages")
-    to_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="messages")
+    chatroom = models.ForeignKey("Chatroom", on_delete=models.CASCADE, default=None, null=True, related_name="chatroom_messages")
     likes = models.ManyToManyField("Account", blank=True, related_name="messages_liked")
-    image = models.ForeignKey(Attachment, on_delete=models.CASCADE, default=None, null=True, related_name="message_image")
-    video = models.ForeignKey(Attachment, on_delete=models.CASCADE, default=None, null=True, related_name="message_video")
+    image = models.ForeignKey("Attachment", on_delete=models.CASCADE, default=None, blank=True, null=True, related_name="message_image")
+    video = models.ForeignKey("Attachment", on_delete=models.CASCADE, default=None, blank=True, null=True, related_name="message_video")
 
     def __str__(self):
         return self.content;

@@ -22,6 +22,7 @@ from backend.serializers import AccountFollowingSerializer
 
 router = routers.DefaultRouter()
 router.register(r'Chatroom', ChatroomViewSet)
+router.register(r'Message', MessageViewSet)
 router.register(r'Account', AccountViewSet)
 router.register(r'Post', PostViewSet)
 router.register(r'Comment', CommentViewSet)
@@ -47,5 +48,6 @@ urlpatterns = [
     path('api/post/add/', add_post_image),
     path('api/image/add/', add_image_attachment),
     path('api/validate/', validate_login),
+    path('api/chatrooms/', account_chatrooms_list),
 ]
     
