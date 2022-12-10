@@ -3,7 +3,7 @@
 	<div style="display:flex;align-items:center;flex-direction:column;">
 	    <NewHeader
 		:backgroundColor="Profile.post_color"
-		:logout="logoutuser"
+		:logout="logoutUser"
 		:dark="Auth.setDarkMode"
 		:profileLink="`/account/${Profile.username}`"
 		feedLink="/feed"

@@ -3,12 +3,13 @@
 	<div style="display:flex;align-items:center;flex-direction:column;">
 	    <NewHeader
 		:backgroundColor="Auth.userData.post_color"
-		:logout="logoutuser"
+		:logout="Auth.clearUserSession"
 		:dark="Auth.setDarkMode"
 		:profileLink="`/account/${Auth.userData.username}`"
 		feedLink="/feed"
 		imageLink="/images"
 	    ></NewHeader>
+
 	    <div style="display:flex;justify-content:space-around;"><h3>{{Auth.userData.username}}'s Feed</h3></div>
 	    <div v-for="post in Feed.posts">
 	      <div class="q-pa-md row items-start q-gutter-md" >
@@ -19,7 +20,7 @@
 		       </q-card-section>
 
 			   
-		       <q-card-section v-if="post.stripped_image != 'None' || post.stripped_image != ''">
+		       <q-card-section v-if="post.stripped_image != ''">
 		           <q-img :src="post.stripped_image"></q-img>
 		       </q-card-section>
 

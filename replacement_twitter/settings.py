@@ -22,6 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+ACCOUNT_STATIC_ROOT = "/account-static/"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-(9!6p0a#axn$l6%m*_#i(8w^i^#cypi2w5tud2yblfe)7daz7$'

@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework import routers, serializers, viewsets
 from .models import Account, Post, Attachment, Comment
-from replacement_twitter.settings import BASE_DIR
+from replacement_twitter.settings import ACCOUNT_STATIC_ROOT
 
 
 
@@ -37,13 +37,13 @@ class PostSerializer(serializers.ModelSerializer):
         return obj.post_creator.username
  
     def get_stripped_video(self, obj):
-        if str(obj.video) != "":
-            return str(obj.video).replace(str(BASE_DIR), "")
+        if str(obj.video):
+            return ACCOUNT_STATIC_ROOT + str(obj.video)
         return ""
 
     def get_stripped_image(self, obj):
         if obj.image:
-            return "/account-static/" + str(obj.image)
+            return ACCOUNT_STATIC_ROOT + str(obj.image)
         return ""
 
     def get_account_post_color(self, obj):
@@ -64,13 +64,13 @@ class AccountSerializer(serializers.ModelSerializer):
     stripped_background_photo = serializers.SerializerMethodField()
     
     def get_stripped_profile_photo(self, obj):
-        if str(obj.profile_photo) != "":
-            return "/account-static/" + str(obj.profile_photo)
+        if obj.profile_photo:
+            return ACCOUNT_STATIC_ROOT + str(obj.profile_photo)
         return ""
     
     def get_stripped_background_photo(self, obj):
-        if str(obj.background_photo) != "":
-            return "/account-static/" + str(obj.background_photo)
+        if obj.background_photo:
+            return ACCOUNT_STATIC_ROOT + str(obj.background_photo)
         return ""
 
     class Meta:
@@ -83,8 +83,8 @@ class AccountFollowedSerializer(serializers.ModelSerializer):
     stripped_profile_photo = serializers.SerializerMethodField()
     
     def get_stripped_profile_photo(self, obj):
-        if str(obj.profile_photo) != "":
-            return str(obj.profile_photo).replace(str(BASE_DIR), "")
+        if obj.profile_photo:
+            return ACCOUNT_STATIC_ROOT + str(obj.profile_photo)
         return ""
     
     class Meta:
@@ -100,13 +100,13 @@ class AccountFollowingSerializer(serializers.ModelSerializer):
     
     
     def get_stripped_profile_photo(self, obj):
-        if str(obj.profile_photo) != "":
-            return "/account-static/" + str(obj.profile_photo)
+        if obj.profile_photo:
+            return ACCOUNT_STATIC_ROOT + str(obj.profile_photo)
         return ""
     
     def get_stripped_background_photo(self, obj):
-        if str(obj.background_photo) != "":
-            return "/account-static/" + str(obj.background_photo)
+        if obj.background_photo:
+            return ACCOUNT_STATIC_ROOT + str(obj.background_photo)
         return ""
 
     class Meta:

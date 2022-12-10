@@ -1,18 +1,28 @@
 <template >
     <q-layout class="flex flex-center custom-background" view="lHh Lpr lFf" v-bind:style="{ backgroundImage: 'url(' + Profile.stripped_background_photo + ')' }">
-      <div style="display:flex;align-items:center;flex-direction:column;">
-	  <q-btn color="primary" label="Logout" @click="logoutUser" />
-	  <div class="account-header" :style="{'background-color': this.Profile.post_color}" style="width: 100%;display:flex;align-items:center;flex-direction:column;" >
-		  <h3>{{Profile.username}}</h3>
-		  <img class="profile-photo" :src="Profile.stripped_profile_photo">
-	      <h5>{{Profile.name}}</h5>
-	      <q-btn-group push>
-		  <q-btn push color="secondary" :text-color="[followed ? likedColor : unlikedColor]" label="Follow" icon="favorite" />
-		  <q-btn push color="secondary" @click="" label="Followers" icon="history" />
-		  <q-btn push v-if="Auth.userId === Profile.id" @click="editProfile = !editProfile" color="secondary" label="Edit" icon="update" />
-	      </q-btn-group>
-	      <q-btn icon="navigation" flat  @click="followAccount(Profile.id)" />
-	  </div>
+	<div style="display:flex;align-items:center;flex-direction:column;">
+	    <NewHeader
+		:backgroundColor="Auth.userData.post_color"
+		:logout="Auth.clearUserSession"
+		:dark="Auth.setDarkMode"
+		:profileLink="`/account/${Auth.userData.username}`"
+		feedLink="/feed"
+		imageLink="/images"
+	    ></NewHeader>
+	    <ProfileHeader
+		style="margin-top:6rem;"
+		:username="Profile.username"
+		:backgroundColor="Profile.post_color"
+		:name="Profile.name"
+		:profilePhoto="Profile.stripped_profile_photo"
+		:followColor="[followed ? likedColor : unlikedColor]"
+		:goToFollowersPage="goToFollowersPage"
+		:followAccount="followAccount"
+		:editProfile="editProfile"
+		:canEdit="[Auth.userId === Profile.id]"
+	    ></ProfileHeader>
+
+
 	  <div v-if="editProfile" class="edit-profile">
 	      <q-input rounded outlined v-model="Profile.username" label="Username"/>
 	      <q-input rounded outlined v-model="Profile.name" label="name"/>
@@ -29,7 +39,7 @@
 		  <q-item v-for="follow in Profile.followers" class="q-my-sm" clickable v-ripple>
 		      <q-item-section avatar>
 
-			  <div v-if="follow.stripped_profile_photo !== '' || follow.stripped_profile_photo !== 'None'" >
+			  <div v-if="follow.stripped_profile_photo" >
 			      <q-avatar color="primary" text-color="white">
 				  <img size="250px"  :src="follow.stripped_profile_photo">
 			      </q-avatar>
@@ -80,10 +90,12 @@
  import { defineComponent, ref } from 'vue'
  import { useQuasar } from 'quasar'
  import { useAuthStore } from '../stores/auth';
- 
+ import  NewHeader from '../components/NewHeader.vue';
+ import  ProfileHeader from '../components/ProfileHeader.vue';
+
  export default defineComponent({
      name: 'AccountLayout',
-     components: {},
+     components: {NewHeader, ProfileHeader},
      setup () {
 	 const $q = useQuasar()
 	 $q.dark.set(true)
