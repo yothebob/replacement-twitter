@@ -28,6 +28,7 @@ class PostSerializer(serializers.ModelSerializer):
     post_creator_post_color = serializers.SerializerMethodField()
     stripped_video = serializers.SerializerMethodField()
     stripped_image = serializers.SerializerMethodField()
+    timeCreated = serializers.CharField(source="created")
     
     def get_account_username(self, obj):
         return obj.account.username
@@ -41,7 +42,7 @@ class PostSerializer(serializers.ModelSerializer):
         return ""
 
     def get_stripped_image(self, obj):
-        if str(obj.image) != "":
+        if obj.image:
             return "/account-static/" + str(obj.image)
         return ""
 
@@ -53,7 +54,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'account', 'post_creator', "post_creator_username", "stripped_image", "stripped_video", 'account_username', 'account_post_color','post_creator_post_color' , 'blog', 'likes', "comments"]
+        fields = ['id', 'title', 'timeCreated', 'content', 'account', 'post_creator', "post_creator_username", "stripped_image", "stripped_video", 'account_username', 'account_post_color','post_creator_post_color' , 'blog', 'likes', "comments"]
 
         
 # Serializers define the API representation.
@@ -115,9 +116,10 @@ class AccountFollowingSerializer(serializers.ModelSerializer):
 
         
 class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
+    timeCreated = serializers.CharField(source="created")
     class Meta:
         model = Attachment
-        fields = ['url', 'post', 'name', 'file_path']
+        fields = ['url', "timeCreated", 'post', 'name', 'file_path']
 
 
 # class userPostsSerializer(serializers.HyperlinkedModelSerializer):

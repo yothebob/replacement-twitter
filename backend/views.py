@@ -43,6 +43,11 @@ class AttachmentViewSet(viewsets.ModelViewSet):
 
 
 
+# @csrf_exempt
+# def account_image_list(request, userName):
+#     uploaded_images = Account.created_post.image
+#     return JsonResponse({"test":uploaded_images})
+
 @csrf_exempt
 def account_following_list(request, userName):
     account = Account.objects.filter(username=userName).first()
@@ -302,6 +307,7 @@ def create_post(request):
         if account and post_creator:
             new_post = Post(
                 account=account,
+                created=datetime.datetime.today(),
                 post_creator=post_creator,
                 title=json_decoded["title"],
                 content=json_decoded["content"],

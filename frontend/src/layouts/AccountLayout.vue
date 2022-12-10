@@ -63,10 +63,11 @@
 		       <q-card-section>
 			   <div class="text-h6">{{post.title}}</div>
 			   <div class="text-subtitle2">by {{post.post_creator_username}}</div>
+			   <div class="text-subtitle4">created {{post.timeCreated}}</div>
 		       </q-card-section>
 
 			   
-		       <q-card-section v-if="post.stripped_image !== 'None' || post.stripped_image !== ''">
+		       <q-card-section v-if="post.stripped_image !== ''">
 		           <q-img :src="post.stripped_image"></q-img>
 		       </q-card-section>
 

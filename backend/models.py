@@ -1,5 +1,6 @@
 from django.db import models
-from datetime import datetime
+from django.utils import timezone
+import datetime
 
 color_choices = (
     ("white","white"),
@@ -15,7 +16,7 @@ color_choices = (
 class Attachment(models.Model):
     name = models.CharField(max_length=100, default="new filename")
     file = models.FilePathField(max_length=500, path="/var/www/replacement-twitter/account-static", null=True, blank=True)
-    created = models.DateField(default=datetime.today())
+    created = models.DateTimeField(default=datetime.datetime.now())
     is_image = models.BooleanField(default=None, null=True)
     is_video = models.BooleanField(default=None, null=True)
 
@@ -24,7 +25,7 @@ class Attachment(models.Model):
 
 
 class Account(models.Model):
-    created = models.DateField(default=datetime.today())
+    created = models.DateTimeField(default=datetime.datetime.now())
     username = models.CharField(max_length=100, default="user")
     password = models.CharField(max_length=100, default="password")
     name = models.CharField(max_length=100, default="user")
@@ -41,7 +42,7 @@ class Account(models.Model):
 
     
 class Post(models.Model):
-    created = models.DateField(default=datetime.today())
+    created = models.DateTimeField(default=datetime.datetime.now())
     title = models.CharField(max_length=100, default="new Post")
     content = models.TextField(default="Write your content here (Hint: you can use markdown!)")
     post_creator = models.ForeignKey(Account, on_delete=models.CASCADE, default=None, null=True, related_name="created_post")
@@ -57,7 +58,7 @@ class Post(models.Model):
     
 
 class Message(models.Model):
-    created = models.DateField(default=datetime.today())
+    created = models.DateTimeField(default=datetime.datetime.now())
     content = models.TextField(default="")
     from_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="sent_messages")
     to_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="messages")
@@ -70,7 +71,7 @@ class Message(models.Model):
     
     
 class Comment(models.Model):
-    created = models.DateField(default=datetime.today())
+    created = models.DateTimeField(default=datetime.datetime.now())
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     body = models.CharField(max_length=1500, blank=True, null=True)
