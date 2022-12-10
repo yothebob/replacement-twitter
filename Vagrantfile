@@ -84,7 +84,8 @@ Vagrant.configure("2") do |config|
   cd /var/www/replacement-twitter/frontend;
   npm install -g npm@latest;
   npm install;
-  npm run build;
+  npm install -g @quasar/cli;
+  quasar build;
   cd /var/www/replacement-twitter;
   service uwsgi restart;
   service nginx restart;
