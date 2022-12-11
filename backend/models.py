@@ -30,10 +30,8 @@ class Account(models.Model):
     password = models.CharField(max_length=100, default="password")
     name = models.CharField(max_length=100, default="user")
     following = models.ManyToManyField("Account", blank=True, related_name="followers")
-    profile_photo = models.ForeignKey(Attachment, on_delete=models.CASCADE, default=None, null=True, related_name="account_profile_photo")
-    # profile_photo = models.FilePathField(max_length=250, path="/var/www/replacement-twitter/account-static", null=True, blank=True)
-    # background_photo = models.FilePathField(max_length=250, path="/var/www/replacement-twitter/account-static", null=True, blank=True)
-    background_photo = models.ForeignKey(Attachment, on_delete=models.CASCADE, default=None, null=True, related_name="account_background_photo")
+    profile_photo = models.ForeignKey(Attachment, on_delete=models.CASCADE, default=None, null=True, blank=True, related_name="account_profile_photo")
+    background_photo = models.ForeignKey(Attachment, on_delete=models.CASCADE, default=None, null=True, blank=True, related_name="account_background_photo")
     total_posts = models.IntegerField(default=0)
     post_color = models.CharField(max_length=75, default="white",choices=color_choices)
     
