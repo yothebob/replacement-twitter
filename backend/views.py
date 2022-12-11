@@ -3,7 +3,7 @@ import jwt
 import random
 import datetime
 import string
-
+import base64 
 
 from django.shortcuts import render
 from rest_framework import viewsets
@@ -50,6 +50,40 @@ class AttachmentViewSet(viewsets.ModelViewSet):
 #TODO switch to jwt auth for everything
 
 
+@csrf_exempt
+def chatrooms_send_message(request, chatroom_name):
+    json_decoded = json.loads(request.body)
+    decoded_chatroom_name, chatroom_id = (base64.b64decode(chatroom_name)).split("|||")
+    auth_jwt = request.headers.get("Auth", None)
+    decoded_jwt =  jwt.decode(auth_jwt ,SECRET_KEY, algorithms=["HS256"])
+    pickedChatroom = Chatroom.objects.filter(id=chatroom_id).first()
+    pickedAccount = Account.objects.filter(id=decoded_jwt["account_id"]).first()
+    if pickedAccount and pickedChatroom:
+        #add image upload support seperate (I think there is an api for that)
+        newMessage = Message(
+            created = datetime.datetime.now(),
+            content = json_decoded["content"],
+            from_account = pickedAccount,
+            chatroom = pickedChatroom,
+        )
+        pickedChatroom.messages.add(newMessage)
+        pickedChatroom.save()
+        return JsonResponse({"success": "mesasge sent"})
+    return JsonResponse({"error": "Something went wrong... " })
+
+
+@csrf_exempt
+def chatrooms_message_list(request, chatroom_name):
+    decoded_chatroom_name, chatroom_id = (base64.b64decode(chatroom_name)).split("|||")
+    auth_jwt = request.headers.get("Auth", None)
+    decoded_jwt =  jwt.decode(auth_jwt ,SECRET_KEY, algorithms=["HS256"])
+    pickedChatroom = Chatroom.objects.filter(id=chatroom_id).first()
+    pickedAccount = Account.objects.filter(id=decoded_jwt["account_id"]).first()
+    if pickedAccount and pickedChatroom:
+        serializer = ChatroomSerializer(pickedChatroom)
+        return JsonResponse(serializer.data, safe=False)
+    return JsonResponse({"error": "Something went wrong... " })
+
 
 @csrf_exempt
 def account_chatrooms_list(request):
@@ -57,8 +91,10 @@ def account_chatrooms_list(request):
     decoded_jwt =  jwt.decode(auth_jwt ,SECRET_KEY, algorithms=["HS256"])
     pickedAccount = Account.objects.filter(id=decoded_jwt["account_id"]).first()
     if pickedAccount:
-        chatrooms = Account.chatroom_accounts.all()
-        return JsonResponse({"test":chatrooms})
+        chatrooms = pickedAccount.chatroom_accounts.all()
+        print(chatrooms)
+        serializer = ChatroomSerializer(chatrooms ,many=True)
+        return JsonResponse(serializer.data, safe=False)
     return JsonResponse({"error": "Something went wrong... " })
 
 # @csrf_exempt
@@ -118,19 +154,14 @@ def follow_account(request):
 @csrf_exempt
 def validate_login(request):
     json_decoded = json.loads(request.body)
-    if True:
-    # try:
+    try:
         decoded_jwt = jwt.decode(json_decoded["refresh"],SECRET_KEY, algorithms=["HS256"])
         expire_stamp = datetime.datetime.strptime(decoded_jwt["expire_at"],"%Y-%m-%d %H:%M:%S")
         now = datetime.datetime.now()
         if now < expire_stamp:
-            print("success")
             return JsonResponse({"success": "authenticated"})
-        print("error")
         return JsonResponse({"Error": "not properly authenticated"})
-    # except:
-    else:
-        print("error")
+    except:
         return JsonResponse({"Error": "not properly authenticated"})
 
 # JWT

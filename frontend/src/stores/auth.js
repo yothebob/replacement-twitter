@@ -140,6 +140,7 @@ export const useAuthStore = defineStore("auth", () => {
         this.hasAccess = true;
       } else {
         this.hasAccess = false;
+	  location.href = "/login";
       }
     }
   }

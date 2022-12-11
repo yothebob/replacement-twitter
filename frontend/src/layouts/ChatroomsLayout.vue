@@ -15,15 +15,16 @@
 	    <div>
 		<q-btn label="Create New Chatroom" @click="" />
 	    </div>
+	    <div style="margin:2rem;"></div>
 	    <div v-if="chatRooms">
 		<q-list bordered>
 		<div v-for="room in chatRooms">
-		    <q-item @click="enterChatRoom(room)" clickable v-ripple>
+		    <q-item @click="router.push({'path': '/message/' + room.btoaName})" clickable v-ripple>
 
 			<q-item-section>
 			    <q-item-label>{{room.name}}</q-item-label>
-			    <q-item-label caption lines="2">
-				{{room.messageList[-1].content}}
+			    <q-item-label caption lines="1">
+				{{room.chatroom_messages[room.chatroom_messages.length -1 ].content}}
 			    </q-item-label>
 			</q-item-section>
 			
@@ -58,6 +59,7 @@
  import { defineComponent, ref } from 'vue'
  import { useAuthStore } from '../stores/auth';
  import  NewHeader from '../components/NewHeader.vue';
+ import { useRouter } from 'vue-router';
  
  export default defineComponent({
      name: 'ChatroomsLayout',
@@ -65,18 +67,22 @@
      components: { NewHeader },
      data: () => {
 	 return {
-	     
 	     chatRooms: {},
+	     router: null,
 	 }
      },
      async created () {
+	 this.router = useRouter();
 	 this.Auth = useAuthStore();
+	 const valid = await this.Auth.validateSession();
+	 if (this.Auth.hasAccess == false) {
+	     window.location.href = "/login/";
+	 }
+
 	 this.chatRooms = await this.getChatRooms(this.Auth.userId);
-	 /* this.Feed.posts.forEach((post) => {
-	    // TODO added liked here if userid in post.likes?
-	    post.likes.includes(this.Auth.userId) ? post.liked = "Liked" : post.liked = "Like"  
-	    post.showComments = false;
-	    }) */
+	 this.chatRooms.forEach((cr) => {
+	     cr.btoaName = btoa(`${cr.name}|||${cr.id}`);
+	 })
      },
      
      methods: {
@@ -92,28 +98,6 @@
 	     const json = await res.json();
 	     return json;
 	 },
-
-	 likeItem: async function (accountKey, itemKey, item, itemObj) {
-	     if (itemObj.liked ===  "Liked") {
-		 return;
-	     }
-	     const url = "/api/like/";
-	     const res = await fetch(url, {
-		 method: "POST",
-		 headers: { "Content-Type": "application/json" },
-		 body: JSON.stringify({
-		     accountKey: accountKey,
-		     itemKey: itemKey,
-		     item: item,
-		 })
-	     })
-	     const json = await res.json();
-	     if ("success" in json) {
-		 itemObj.liked = "Liked"
-		 itemObj.likes.push(accountKey)
-	     } 
-	 }
-	 
      },
      
  })

@@ -89,6 +89,11 @@
      },
      async created () {
 	 this.Auth = useAuthStore();
+	 const valid = await this.Auth.validateSession();
+	 if (this.Auth.hasAccess == false) {
+	     window.location.href = "/login/";
+	 }
+
 	 this.Feed = await this.getProfileFeed(this.Auth.userId);
 	 this.Feed.posts.forEach((post) => {
 	     // TODO added liked here if userid in post.likes?

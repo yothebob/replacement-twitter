@@ -77,6 +77,25 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ["id",'username', 'name', "stripped_profile_photo","stripped_background_photo", 'following', "posts", "post_color"]
 
+# slimmer accountSerializer AKA no posts
+class FKAccountSerializer(serializers.ModelSerializer):
+    stripped_profile_photo = serializers.SerializerMethodField()
+    stripped_background_photo = serializers.SerializerMethodField()
+    
+    def get_stripped_profile_photo(self, obj):
+        if obj.profile_photo:
+            return ACCOUNT_STATIC_ROOT + str(obj.profile_photo)
+        return ""
+    
+    def get_stripped_background_photo(self, obj):
+        if obj.background_photo:
+            return ACCOUNT_STATIC_ROOT + str(obj.background_photo)
+        return ""
+
+    class Meta:
+        model = Account
+        fields = ["id",'username', 'name', "stripped_profile_photo","stripped_background_photo", 'following', "post_color"]
+
 
 # a serializer to pass account for another accounts following list
 class AccountFollowedSerializer(serializers.ModelSerializer):
@@ -123,9 +142,9 @@ class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
         
 class MessageSerializer(serializers.HyperlinkedModelSerializer):
     timeCreated = serializers.CharField(source="created")
-    fromAccount = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())
-    chatroomId = serializers.PrimaryKeyRelatedField(queryset=Chatroom.objects.all())
-    messages_liked = AccountSerializer(many=True, read_only=True)
+    from_account = FKAccountSerializer(read_only=True)
+    chatroom = serializers.PrimaryKeyRelatedField(queryset=Chatroom.objects.all())
+    messages_liked = FKAccountSerializer(many=True, read_only=True)
     stripped_image = serializers.SerializerMethodField()
     stripped_video = serializers.SerializerMethodField()
 
@@ -142,13 +161,13 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = Message
-        fields = ["id", "timeCreated", 'content', 'fromAccount', 'chatroomId', 'messages_liked', "stripped_image", "stripped_video"]
+        fields = ["id", "timeCreated", 'content', 'from_account', 'chatroom', 'messages_liked', "stripped_image", "stripped_video"]
 
         
 class ChatroomSerializer(serializers.HyperlinkedModelSerializer):
     timeCreated = serializers.CharField(source="created")
     chatroom_messages = MessageSerializer(many=True, read_only=True)
-    chatroom_accounts = AccountSerializer(many=True, read_only=True)
+    chatroom_accounts = FKAccountSerializer(many=True, read_only=True)
 
     class Meta:
         model = Chatroom
