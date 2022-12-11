@@ -10,18 +10,19 @@
 		imageLink="/images"
 		chatLink="/chatrooms"
 	    ></NewHeader>
-	    <ProfileHeader
-		style="margin-top:6rem;"
-		:username="Profile.username"
-		:backgroundColor="Profile.post_color"
-		:name="Profile.name"
-		:profilePhoto="Profile.stripped_profile_photo"
-		:followColor="[followed ? likedColor : unlikedColor]"
-		:goToFollowersPage="goToFollowersPage"
-		:followAccount="followAccount"
-		:editProfile="editProfile"
-		:canEdit="[Auth.userId === Profile.id]"
-	    ></ProfileHeader>
+
+	    <div class="account-header" :style="{'background-color': Profile.post_color}" >
+		<h3>{{Profile.username}}</h3>
+		<img class="profile-photo" :src="Profile.stripped_profile_photo">
+		<h5>{{Profile.name}}</h5>
+		<q-btn-group push>
+		    <q-btn push color="secondary" :text-color="[followed ? likedColor : unlikedColor]" label="Follow" icon="favorite" />
+		    <q-btn push color="secondary" @click="goToFollowersPage" label="Followers" icon="history" />
+		    <q-btn push v-if="Auth.userId === Profile.id" @click="editProfile = !editProfile" color="secondary" label="Edit" icon="update" />
+		</q-btn-group>
+		<q-btn icon="navigation" flat  @click="followAccount" />
+	    </div>
+
 	    <div v-if="editProfile" class="edit-profile">
 	      <q-input rounded outlined v-model="Profile.username" label="Username"/>
 	      <q-input rounded outlined v-model="Profile.name" label="name"/>
@@ -241,7 +242,7 @@
 		     title: this.newPostTitle,
 		     content: this.newPostContent,
 		 })
-		 })
+	     })
 	     const json = await res.json();
 	     this.showCreatePost = false;
 	     if ("success" in json) {
@@ -355,7 +356,13 @@
      height: 300px;
      border-radius: 50%;
  }
- .custom-background {
+ .account-header {
+     width: 100%;
+     display:flex;
+     align-items:center;
+     flex-direction:column;
+ }
+.custom-background {
      
  }
 </style>
