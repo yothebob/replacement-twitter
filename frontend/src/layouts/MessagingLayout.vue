@@ -34,7 +34,8 @@
 		    </div>		
 		</div>	
 	    </div>
-	    <q-input rounded outlined v-model="typedMessage" label="" style="height:1.5rem;">
+	    <div class="message-input-bar">
+	    <q-input rounded outlined v-model="typedMessage" label="" >
 		<template v-slot:after>
 		    <q-btn round dense flat
 			   icon="send"
@@ -44,7 +45,8 @@
 		    />
 		</template>
 	    </q-input>
-
+	    </div>
+	    <div class="input-invisible-pad"></div>
 	</div>
   </q-layout>
 </template>
@@ -65,6 +67,7 @@
 	     typedMessage: "",
 	     sendError: false,
 	     errorMessage: null,
+	     timer: null,
 	 }
      },
      async created () {
@@ -76,8 +79,31 @@
 
 	 this.Messages = await this.getChatroomMessages(this.$route.params.chatroom);
      },
-     
+     mounted: function () {
+	 this.timer = setInterval(() => {
+	     this.apiCheckMessages(this.$route.params.chatroom);
+	 }, 5000);
+     },
+     beforeDestroy() {
+	 clearInterval(this.timer)
+     },
      methods: {
+	 apiCheckMessages: async function (key) {
+	     const url = "/api/chatroom/check/" + key + "/"
+	     const res = await fetch(url, {
+		 method: "GET",
+		 headers: {
+		     "Content-Type": "application/json",
+		     "Auth": this.Auth.refreshToken,
+		     "lastKey": this.Messages.chatroom_messages[this.Messages.chatroom_messages.length -1 ].id,
+		 }
+	     })
+	     const json = await res.json();
+	     if ("success" in json) {
+		 this.Messages.chatroom_messages = [...this.Messages.chatroom_messages, ...json.updated];
+	     }
+	     
+	 },
 	 getChatroomMessages: async function (key) {
 	     const url = "/api/chatroom/" + key + "/"
 	     const res = await fetch(url, {
@@ -139,3 +165,15 @@
      
  })
 </script>
+<style>
+
+ .message-input-bar {
+     width: 90%;
+     background-color: white;
+     position: fixed;
+     bottom: 2%;
+ }
+ .input-invisible-pad {
+     margin-top: 4rem;
+ }
+</style>

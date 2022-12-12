@@ -51,6 +51,23 @@ class AttachmentViewSet(viewsets.ModelViewSet):
 
 
 @csrf_exempt
+def chatrooms_check_message(request, chatroom_name):
+    if True:
+        decoded_chatroom_name = (base64.b64decode(bytes(chatroom_name, 'utf-8')))
+        chatroom_var = (decoded_chatroom_name.decode("utf-8")).split("|||")
+        auth_jwt = request.headers.get("Auth", None)
+        last_key = request.headers.get("lastKey", None)
+        decoded_jwt =  jwt.decode(auth_jwt ,SECRET_KEY, algorithms=["HS256"])
+        pickedChatroom = Chatroom.objects.filter(id=chatroom_var[-1]).first()
+        pickedAccount = Account.objects.filter(id=decoded_jwt["account_id"]).first()
+        if pickedAccount and pickedChatroom:
+            latest_messages = pickedChatroom.chatroom_messages.filter(id__gt=last_key)
+            serialized = MessageSerializer(latest_messages, many=True)
+        return JsonResponse({"success": "" , "updated": serialized.data})
+    else:
+        return JsonResponse({"error": "Something went wrong..." })
+    
+@csrf_exempt
 def chatrooms_send_message(request, chatroom_name):
     try:
         json_decoded = json.loads(request.body)

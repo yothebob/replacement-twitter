@@ -14,6 +14,10 @@
 	    <div style="display:flex;justify-content:space-around;"><h3>Chat Rooms</h3></div>
 	    <div>
 		<q-btn label="Create New Chatroom" @click="" />
+		<div>
+		    
+		    
+		</div>
 	    </div>
 	    <div style="margin:2rem;"></div>
 	    <div v-if="chatRooms">
