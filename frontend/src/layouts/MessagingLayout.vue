@@ -13,7 +13,7 @@
 
 	    <div class="q-pa-md row justify-center">
 		<div style="width: 100%; max-width: 400px">
-		    <div v-for="msg in Messages.chatroom_messages" >
+		    <div v-for="msg in Messages.chatroom_messages" id="chat-div">
 			<div v-if="msg.stripped_image != ''" style="padding: 20px;">
 			    <q-img
 				:src="msg.stripped_image"
@@ -122,7 +122,7 @@
 		 }, 
 		 body: data,
 	     })
-	     const j = await imageAdd.json()
+	     const j = await imageAdd.json();
 	     return j.stripped_image;
 	 },
 
@@ -170,9 +170,10 @@
 	     const json = await res.json();
 	     if ( "success" in json ) {
 		 this.sendError = false;
-		 if (this.msgUploadedImage != ""){
+		 if (this.msgUploadedImage != null){
 		     const sentImage = await this.addMessageImage(json.newMsg.id);
-		     json.newMsg.stripped_image = sentImage;
+		     json.newMsg.stripped_image = this.msgUploadedImage;
+		     this.msgUploadedImage = null;
 		     this.Messages = {...json.updated, ...json.newMsg }
 		 } else {
 		     this.Messages = {...json.updated}

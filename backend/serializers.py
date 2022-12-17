@@ -170,14 +170,18 @@ class ChatroomSerializer(serializers.HyperlinkedModelSerializer):
     chatroom_accounts = FKAccountSerializer(many=True, read_only=True)
 
     def get_chatroom_messages(self, obj):
-        query = Message.objects.filter(chatroom=obj)
+        query = Message.objects.filter(chatroom=obj).order_by('id')[:40]
         serializer = MessageSerializer(query ,many=True)
+        return serializer.data
+
+        # query = Message.objects.filter(chatroom=obj)
+        # serializer = MessageSerializer(query ,many=True)
         # doing a hack because django sucks apparently
         # fixed_query = print([serializer.data[len(serializer.data)-1][i] for i in serializer.data[len(serializer.data)-1]])
         # for ii in range(len(serializer.data)):
         #     for i in serializer.data[i]:
         #         print(serializer.data[i][ii])
-        return serializer.data
+        # return serializer.data
     
     class Meta:
         model = Chatroom
