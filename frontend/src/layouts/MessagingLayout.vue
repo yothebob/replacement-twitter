@@ -14,41 +14,59 @@
 	    <div class="q-pa-md row justify-center">
 		<div style="width: 100%; max-width: 400px">
 		    <div v-for="msg in Messages.chatroom_messages" >
-			<q-chat-message
-			    v-if="msg.from_account.id == this.Auth.userData.id"
-			    :name="msg.from_account.username"
-			    :avatar="msg.from_account.stripped_profile_photo ? msg.from_account.stripped_profile_photo : undefined"
-			    :text="[msg.content]"
-			    :stamp="msg.timeCreated"
-			    sent
-			    :bg-color="msg.from_account.post_color"
-			/>
-			<q-chat-message
-			    v-else
-			    :name="msg.from_account.username"
-			    :avatar="msg.from_account.stripped_profile_photo ? msg.from_account.stripped_profile_photo : undefined"
-			    :text="[msg.content]"
-			    :stamp="msg.timeCreated"
-			    :bg-color="msg.from_account.post_color"
-			/>
+			<div v-if="msg.stripped_image != ''" style="padding: 20px;">
+			    <q-img
+				:src="msg.stripped_image"
+				spinner-color="white"
+				style="height: 200px; max-width: 200px"
+			    />
+			</div>
+			<div v-if="msg.content != ''">
+			    <q-chat-message
+				v-if="msg.from_account.id == this.Auth.userData.id"
+				:name="msg.from_account.username"
+				:avatar="msg.from_account.stripped_profile_photo ? msg.from_account.stripped_profile_photo : undefined"
+				:text="[msg.content]"
+				:stamp="msg.timeCreated"
+				sent
+				:bg-color="msg.from_account.post_color"
+			    />
+			    <q-chat-message
+				v-else
+				:name="msg.from_account.username"
+				:avatar="msg.from_account.stripped_profile_photo ? msg.from_account.stripped_profile_photo : undefined"
+				:text="[msg.content]"
+				:stamp="msg.timeCreated"
+				:bg-color="msg.from_account.post_color"
+			    />
+			</div>
 		    </div>		
 		</div>	
 	    </div>
 	    <div class="message-input-bar">
-		<q-input rounded outlined
+		<div >
+		<q-file  style="width:50px;font-size:0;" v-model="msgUploadedImage">
+		    <template v-slot:prepend>
+			<q-icon name="attach_file" />
+		    </template>
+		</q-file>
+		</div>
+		<div style="width:95%;">
+	  	<q-input rounded outlined
 			 v-model="typedMessage"
 			 label=""
 			 v-on:keyup.enter="apiSendMessage"
 		>
-		<template v-slot:after>
-		    <q-btn round dense flat
-			   icon="send"
-			   @click="apiSendMessage"
-			   error-message="Something went wrong..."
-			   :error="sendError"
-		    />
-		</template>
-	    </q-input>
+		    <template v-slot:after>
+			<q-btn round dense flat
+			       icon="send"
+			       @click="apiSendMessage"
+			       error-message="Something went wrong..."
+			       :error="sendError"
+			/>
+		    </template>
+		</q-input>
+		</div>
 	    </div>
 	    <div class="input-invisible-pad" id="msg-div"></div>
 	</div>
@@ -66,8 +84,8 @@
      components: { NewHeader },
      data: () => {
 	 return {
-	     
 	     Messages: {},
+	     msgUploadedImage: null,
 	     typedMessage: "",
 	     sendError: false,
 	     errorMessage: null,
@@ -93,6 +111,21 @@
 	 clearInterval(this.timer);
      },
      methods: {
+	 addMessageImage: async function (msgId) {
+	     var data = new FormData()
+	     data.append('image', this.msgUploadedImage)
+	     const imageAdd = await fetch("/api/image/add/",{
+		 method: "POST",
+		 headers: { "Auth": this.Auth.refreshToken,
+			    "type": "message",
+			    "id": msgId ,
+		 }, 
+		 body: data,
+	     })
+	     const j = await imageAdd.json()
+	     return j.stripped_image;
+	 },
+
 	 apiCheckMessages: async function (key) {
 	     const url = "/api/chatroom/check/" + key + "/"
 	     const res = await fetch(url, {
@@ -137,7 +170,13 @@
 	     const json = await res.json();
 	     if ( "success" in json ) {
 		 this.sendError = false;
-		 this.Messages = {...json.updated}
+		 if (this.msgUploadedImage != ""){
+		     const sentImage = await this.addMessageImage(json.newMsg.id);
+		     json.newMsg.stripped_image = sentImage;
+		     this.Messages = {...json.updated, ...json.newMsg }
+		 } else {
+		     this.Messages = {...json.updated}
+		 }
 	     } else {
 		 this.sendError = true;
 		 this.errorMessage = json.error;
@@ -173,7 +212,9 @@
 <style>
 
  .message-input-bar {
-     width: 90%;
+     display: flex;
+     flex-direction: row;
+     width: 100%;
      background-color: white;
      position: fixed;
      bottom: 2%;

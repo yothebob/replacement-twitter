@@ -89,7 +89,8 @@ def chatrooms_send_message(request, chatroom_name):
             pickedChatroom.chatroom_messages.add(newMessage)
             pickedChatroom.save()
             updatedMessages = ChatroomSerializer(pickedChatroom)
-            return JsonResponse({"success": "mesasge sent", "updated": updatedMessages.data})
+            serialize_msg = MessageSerializer(newMessage)
+            return JsonResponse({"success": "mesasge sent", "updated": updatedMessages.data, "newMsg": serialize_msg.data})
     except:
         return JsonResponse({"error": "Something went wrong... " })
 
