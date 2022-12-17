@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework import routers, serializers, viewsets
 from .models import Account, Post, Attachment, Comment, Message, Chatroom
 from replacement_twitter.settings import ACCOUNT_STATIC_ROOT
-
+import pytz
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -141,7 +141,7 @@ class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
 
         
 class MessageSerializer(serializers.HyperlinkedModelSerializer):
-    timeCreated = serializers.CharField(source="created")
+    timeCreated = serializers.DateTimeField(source="created", format="%b %d %I:%M:%S", default_timezone=pytz.timezone("US/Pacific"))
     from_account = FKAccountSerializer(read_only=True)
     chatroom = serializers.PrimaryKeyRelatedField(queryset=Chatroom.objects.all())
     messages_liked = FKAccountSerializer(many=True, read_only=True)
@@ -166,9 +166,14 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
         
 class ChatroomSerializer(serializers.HyperlinkedModelSerializer):
     timeCreated = serializers.CharField(source="created")
-    chatroom_messages = MessageSerializer(many=True, read_only=True)
+    chatroom_messages = serializers.SerializerMethodField()
     chatroom_accounts = FKAccountSerializer(many=True, read_only=True)
 
+    def get_chatroom_messages(self, obj):
+        query = Message.objects.filter(chatroom=obj).order_by('id')[:40]
+        serializer = MessageSerializer(query ,many=True)
+        return serializer.data
+    
     class Meta:
         model = Chatroom
         fields = ["id", 'timeCreated', 'name', 'chatroom_accounts', 'chatroom_messages']

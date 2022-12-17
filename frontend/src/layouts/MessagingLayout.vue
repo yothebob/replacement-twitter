@@ -19,7 +19,7 @@
 			    :name="msg.from_account.username"
 			    :avatar="msg.from_account.stripped_profile_photo ? msg.from_account.stripped_profile_photo : undefined"
 			    :text="[msg.content]"
-			    stamp="null minutes ago"
+			    :stamp="msg.timeCreated"
 			    sent
 			    :bg-color="msg.from_account.post_color"
 			/>
@@ -28,14 +28,18 @@
 			    :name="msg.from_account.username"
 			    :avatar="msg.from_account.stripped_profile_photo ? msg.from_account.stripped_profile_photo : undefined"
 			    :text="[msg.content]"
-			    stamp="null minutes ago"
+			    :stamp="msg.timeCreated"
 			    :bg-color="msg.from_account.post_color"
 			/>
 		    </div>		
 		</div>	
 	    </div>
 	    <div class="message-input-bar">
-	    <q-input rounded outlined v-model="typedMessage" label="" >
+		<q-input rounded outlined
+			 v-model="typedMessage"
+			 label=""
+			 v-on:keyup.enter="apiSendMessage"
+		>
 		<template v-slot:after>
 		    <q-btn round dense flat
 			   icon="send"
@@ -46,7 +50,7 @@
 		</template>
 	    </q-input>
 	    </div>
-	    <div class="input-invisible-pad"></div>
+	    <div class="input-invisible-pad" id="msg-div"></div>
 	</div>
   </q-layout>
 </template>
@@ -78,6 +82,7 @@
 	 }
 
 	 this.Messages = await this.getChatroomMessages(this.$route.params.chatroom);
+
      },
      mounted: function () {
 	 this.timer = setInterval(() => {
@@ -85,7 +90,7 @@
 	 }, 5000);
      },
      beforeDestroy() {
-	 clearInterval(this.timer)
+	 clearInterval(this.timer);
      },
      methods: {
 	 apiCheckMessages: async function (key) {
