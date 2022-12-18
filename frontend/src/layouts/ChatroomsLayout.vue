@@ -72,18 +72,25 @@
      data: () => {
 	 return {
 	     chatRooms: {},
+	     accounts: [],
+	     newName: null,
+	     newAccounts: null,
+	     create: false,
 	     router: null,
 	 }
      },
      async created () {
 	 this.router = useRouter();
 	 this.Auth = useAuthStore();
+	 /* const all_accounts = await this.allAccounts();
+	    Array.from(all_accounts).forEach((act) => { this.accounts.push(act.username) }) */
 	 const valid = await this.Auth.validateSession();
 	 if (this.Auth.hasAccess == false) {
 	     window.location.href = "/login/";
 	 }
 
 	 this.chatRooms = await this.getChatRooms(this.Auth.userId);
+	 this.chatRooms.chatroom_messages = this.chatRooms.chatroom_messages.reverse();
 	 this.chatRooms.forEach((cr) => {
 	     cr.btoaName = btoa(`${cr.name}|||${cr.id}`);
 	 })
