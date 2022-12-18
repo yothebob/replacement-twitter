@@ -90,7 +90,9 @@
 	 }
 
 	 this.chatRooms = await this.getChatRooms(this.Auth.userId);
-	 this.chatRooms.chatroom_messages = this.chatRooms.chatroom_messages.reverse();
+	 Array.from(this.chatRooms).forEach((cr) => {
+	     cr.chatroom_messages.reverse();
+	 })
 	 this.chatRooms.forEach((cr) => {
 	     cr.btoaName = btoa(`${cr.name}|||${cr.id}`);
 	 })
