@@ -100,7 +100,7 @@
 	 }
 
 	 this.Messages = await this.getChatroomMessages(this.$route.params.chatroom);
-
+	 this.Messages.chatroom_messages = this.Messages.chatroom_messages.reverse();
      },
      mounted: function () {
 	 this.timer = setInterval(() => {
@@ -172,9 +172,10 @@
 		 this.sendError = false;
 		 if (this.msgUploadedImage != null){
 		     const sentImage = await this.addMessageImage(json.newMsg.id);
-		     json.newMsg.stripped_image = this.msgUploadedImage;
+		     json.newMsg.stripped_image = sentImage
 		     this.msgUploadedImage = null;
-		     this.Messages = {...json.updated, ...json.newMsg }
+		     this.Messages = { ...json.updated }
+		     this.Messages.chatroom_messages.push(json.newMsg)
 		 } else {
 		     this.Messages = {...json.updated}
 		 }
