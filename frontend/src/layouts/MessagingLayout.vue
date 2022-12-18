@@ -174,10 +174,9 @@
 		     const sentImage = await this.addMessageImage(json.newMsg.id);
 		     json.newMsg.stripped_image = sentImage
 		     this.msgUploadedImage = null;
-		     this.Messages = { ...json.updated }
 		     this.Messages.chatroom_messages.push(json.newMsg)
 		 } else {
-		     this.Messages = {...json.updated}
+		     this.Messages.chatroom_messages.push(json.newMsg)
 		 }
 	     } else {
 		 this.sendError = true;
