@@ -13,10 +13,11 @@
 
 	    <div style="display:flex;justify-content:space-around;"><h3>Chat Rooms</h3></div>
 	    <div>
-		<q-btn label="Create New Chatroom" @click="" />
-		<div>
-		    
-		    
+		<q-btn label="Create New Chatroom" @click="create=!create" />
+		<div v-if="create">
+		    <q-input filled v-model="newName" label="Chatroom Name" /> <br/>
+		    <q-select v-model="newAccounts" multiple :options="accounts" label="Accounts" /> <br/>
+		    <q-btn color="primary" @click="apiCreateChatroom" label="Create" />
 		</div>
 	    </div>
 	    <div style="margin:2rem;"></div>
@@ -82,8 +83,8 @@
      async created () {
 	 this.router = useRouter();
 	 this.Auth = useAuthStore();
-	 /* const all_accounts = await this.allAccounts();
-	    Array.from(all_accounts).forEach((act) => { this.accounts.push(act.username) }) */
+	 const all_accounts = await this.allAccounts();
+	 Array.from(all_accounts).forEach((act) => { this.accounts.push(act.username) })
 	 const valid = await this.Auth.validateSession();
 	 if (this.Auth.hasAccess == false) {
 	     window.location.href = "/login/";
@@ -107,6 +108,33 @@
 		     "Content-Type": "application/json",
 		     "Auth": this.Auth.refreshToken,
 		 }
+	     })
+	     const json = await res.json();
+	     return json;
+	 },
+	 allAccounts: async function () {
+	     const url = "/api/Account/"
+	     const res = await fetch(url, {
+		 method: "GET",
+		 headers: {
+		     "Content-Type": "application/json",
+		 }
+	     })
+	     const json = await res.json();
+	     return json;
+	 },
+	 apiCreateChatroom: async function () {
+	     const url = "/api/chatrooms/create/"
+	     const res = await fetch(url, {
+		 method: "POST",
+		 headers: {
+		     "Content-Type": "application/json",
+		     "Auth": this.Auth.refreshToken,
+		 },
+		 body: JSON.stringify({
+		     name: this.newName,
+		     accountNames: this.newAccounts
+		 })
 	     })
 	     const json = await res.json();
 	     return json;

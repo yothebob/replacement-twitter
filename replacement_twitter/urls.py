@@ -49,6 +49,7 @@ urlpatterns = [
     path('api/image/add/', add_image_attachment),
     path('api/validate/', validate_login),
     path('api/chatrooms/', account_chatrooms_list),
+    path('api/chatrooms/create/', create_chatroom),
     path('api/chatroom/<chatroom_name>/', chatrooms_message_list),
     path('api/chatroom/send/<chatroom_name>/', chatrooms_send_message),
     path('api/chatroom/check/<chatroom_name>/', chatrooms_check_message),

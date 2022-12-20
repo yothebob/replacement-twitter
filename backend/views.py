@@ -51,8 +51,29 @@ class AttachmentViewSet(viewsets.ModelViewSet):
 
 
 @csrf_exempt
+def create_chatroom(request):
+    try:
+        json_decoded = json.loads(request.body)
+        auth_jwt = request.headers.get("Auth", None)
+        decoded_jwt =  jwt.decode(auth_jwt ,SECRET_KEY, algorithms=["HS256"])
+        pickedAccount = Account.objects.filter(id=decoded_jwt["account_id"]).first()
+        added_accounts = Account.objects.filter(username__in=json_decoded["accountNames"]).all()
+        if pickedAccount:
+            new_chatroom = Chatroom(
+                created = datetime.datetime.now(),
+                name = json_decoded["name"],
+            )
+            new_chatroom.save()
+            new_chatroom.accounts.set(added_accounts)
+            new_chatroom.save()
+        return JsonResponse({"success": ""})
+    except:
+        return JsonResponse({"error": "Something went wrong..." })
+
+
+@csrf_exempt
 def chatrooms_check_message(request, chatroom_name):
-    if True:
+    try:
         decoded_chatroom_name = (base64.b64decode(bytes(chatroom_name, 'utf-8')))
         chatroom_var = (decoded_chatroom_name.decode("utf-8")).split("|||")
         auth_jwt = request.headers.get("Auth", None)
@@ -64,7 +85,7 @@ def chatrooms_check_message(request, chatroom_name):
             latest_messages = pickedChatroom.chatroom_messages.filter(id__gt=last_key)
             serialized = MessageSerializer(latest_messages, many=True)
         return JsonResponse({"success": "" , "updated": serialized.data})
-    else:
+    except:
         return JsonResponse({"error": "Something went wrong..." })
     
 @csrf_exempt
