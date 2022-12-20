@@ -116,6 +116,32 @@
 	     return json;
 	 },
 
+	 postShowComments: function (post) {
+	     post.showComments = !post.showComments
+	     post.comments.forEach((comment) => {
+		 comment.liked = "white";
+		 comment.likes.includes(this.Auth.userId) ? comment.liked = this.likedColor : comment.liked = this.unlikedColor;
+	     }) 
+	 },
+	 submitComment: async function(accountId, post) {
+	     const url = "/api/comment/"
+	     const res = await fetch(url, {
+		 method: "POST",
+		 headers: { "Content-Type": "application/json" },
+		 body: JSON.stringify({
+		     accountId: accountId,
+		     body: this.newComment,
+		     postId: post.id
+		 })
+	     })
+	     this.newComment = "";
+	     const json = await res.json();
+	     if ( "success" in json) {
+		 console.log(json.newComment)
+		 post.comments.push(json.newComment)
+	     }
+	 },
+	 
 	 likeItem: async function (accountKey, itemKey, item, itemObj) {
 	     if (itemObj.liked ===  "Liked") {
 		 return;
