@@ -336,7 +336,10 @@ def add_image_attachment(request):
     jwt = request.headers.get("Auth", None)
     mtype = request.headers.get("type", None)
     typeId = request.headers.get("id", None)
+    is_image = request.headers.get("image", True)
 
+    is_image = False if is_image == "False" else True
+    
     if jwt is None:
         return JsonResponse({"error": "Something went wrong.."})
     # try:
@@ -351,7 +354,8 @@ def add_image_attachment(request):
                 new_attach = Attachment(
                     file="/var/www/replacement-twitter/account-static/" + random_str,
                     name=random_str,
-                    is_image=True)
+                    is_video=(is_image == False),
+                    is_image=is_image)
                 post.image = new_attach
                 new_attach.save()
                 post.save()
@@ -360,7 +364,8 @@ def add_image_attachment(request):
                 new_attach = Attachment(
                     file="/var/www/replacement-twitter/account-static/" + random_str,
                     name=random_str,
-                    is_image=True)
+                    is_video=(is_image == False),
+                    is_image=is_image)
                 new_background.background_photo = new_attach
                 new_attach.save()
                 new_background.save()
@@ -369,7 +374,8 @@ def add_image_attachment(request):
                 new_attach = Attachment(
                     file="/var/www/replacement-twitter/account-static/" + random_str,
                     name=random_str,
-                    is_image=True)
+                    is_video=(is_image == False),
+                    is_image=is_image)
                 profile_image.profile_photo = new_attach
                 new_attach.save()
                 profile_image.save()
@@ -378,8 +384,12 @@ def add_image_attachment(request):
                 new_attach = Attachment(
                     file="/var/www/replacement-twitter/account-static/" + random_str,
                     name=random_str,
-                    is_image=True)
-                message_image.image = new_attach
+                    is_video=(is_image == False),
+                    is_image=is_image)
+                if is_image:
+                    message_image.image = new_attach
+                else:
+                    message_image.video = new_attach
                 new_attach.save()
                 message_image.save()
 

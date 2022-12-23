@@ -21,6 +21,11 @@
 				style="height: 200px; max-width: 200px"
 			    />
 			</div>
+			<div v-else-if="msg.stripped_video != ''" style="padding: 20px;">
+			    <video width="320" height="240" controls>
+				<source :src="(msg.stripped_video)" type="video/mp4">
+			    </video>
+			</div>
 			<div v-if="msg.content != ''">
 			    <q-chat-message
 				v-if="msg.from_account.id == this.Auth.userData.id"
@@ -114,18 +119,44 @@
 	 addMessageImage: async function (msgId) {
 	     var data = new FormData()
 	     data.append('image', this.msgUploadedImage)
+	     const images = [".png", ".img", ".gif", ".jpeg", ".jpg", ".svg"]
+	     let is_image = true
+	     if (this.msgUploadedImage.name.includes(images)) {
+		 is_image = "True"
+	     } else {
+		 is_image = "False"
+	     }
 	     const imageAdd = await fetch("/api/image/add/",{
 		 method: "POST",
 		 headers: { "Auth": this.Auth.refreshToken,
 			    "type": "message",
 			    "id": msgId ,
+			    "image": is_image
 		 }, 
 		 body: data,
 	     })
 	     const j = await imageAdd.json();
-	     return j.stripped_image;
+	     if (is_image) {
+		 return j.stripped_image;
+	     } else {
+		 return j.stripped_video;
+	     }
 	 },
-
+	 
+	 notify: function (message) {
+	     if (!("Notification" in window)) {
+		 alert("This browser does not support desktop notification");
+	     } else if (Notification.permission === "granted") {
+		 const notification = new Notification(message);
+	     } else if (Notification.permission !== "denied") {
+		 Notification.requestPermission().then((permission) => {
+		     if (permission === "granted") {
+			 const notification = new Notification(message);
+		     }
+		 });
+	     }
+	 },
+	 
 	 apiCheckMessages: async function (key) {
 	     const url = "/api/chatroom/check/" + key + "/"
 	     const res = await fetch(url, {
@@ -138,6 +169,9 @@
 	     })
 	     const json = await res.json();
 	     if ("success" in json) {
+		 if (json.updated.length > 0) {
+		     this.notify("New Message")
+		 }
 		 this.Messages.chatroom_messages = [...this.Messages.chatroom_messages, ...json.updated];
 	     }
 	     
