@@ -337,7 +337,7 @@ def add_image_attachment(request):
     mtype = request.headers.get("type", None)
     typeId = request.headers.get("id", None)
     is_image = request.headers.get("image", True)
-
+    ext = request.headers.get("ext", "")
     is_image = False if is_image == "False" else True
     
     if jwt is None:
@@ -348,12 +348,13 @@ def add_image_attachment(request):
         if mtype in ("post", "background", "profile", "message"):
             data = request.FILES["image"]
             random_str = "".join(random.choice(string.ascii_letters) for i in range(50))
-            path = default_storage.save("/var/www/replacement-twitter/account-static/" + random_str, ContentFile(data.read())) 
+            path = default_storage.save("/var/www/replacement-twitter/account-static/" + random_str + ext, ContentFile(data.read())) 
             if mtype == "post":
                 post = Post.objects.filter(id=typeId).first()
                 new_attach = Attachment(
-                    file="/var/www/replacement-twitter/account-static/" + random_str,
-                    name=random_str,
+                    file="/var/www/replacement-twitter/account-static/" + random_str + ext,
+                    name=(random_str + ext),
+                    ext = ext,
                     is_video=(is_image == False),
                     is_image=is_image)
                 post.image = new_attach
@@ -362,8 +363,9 @@ def add_image_attachment(request):
             elif mtype == "background":
                 new_background = Account.objects.filter(id=typeId).first()
                 new_attach = Attachment(
-                    file="/var/www/replacement-twitter/account-static/" + random_str,
-                    name=random_str,
+                    file="/var/www/replacement-twitter/account-static/" + random_str + ext,
+                    name=(random_str + ext),
+                    ext = ext,
                     is_video=(is_image == False),
                     is_image=is_image)
                 new_background.background_photo = new_attach
@@ -372,8 +374,9 @@ def add_image_attachment(request):
             elif mtype == "profile":
                 profile_image = Account.objects.filter(id=typeId).first()
                 new_attach = Attachment(
-                    file="/var/www/replacement-twitter/account-static/" + random_str,
-                    name=random_str,
+                    file="/var/www/replacement-twitter/account-static/" + random_str + etx,
+                    name=(random_str + ext),
+                    ext = ext,
                     is_video=(is_image == False),
                     is_image=is_image)
                 profile_image.profile_photo = new_attach
@@ -382,8 +385,9 @@ def add_image_attachment(request):
             elif mtype == "message":
                 message_image = Message.objects.filter(id=typeId).first()
                 new_attach = Attachment(
-                    file="/var/www/replacement-twitter/account-static/" + random_str,
-                    name=random_str,
+                    file="/var/www/replacement-twitter/account-static/" + random_str + ext,
+                    name=(random_str + ext),
+                    ext = ext,
                     is_video=(is_image == False),
                     is_image=is_image)
                 if is_image:
@@ -393,7 +397,7 @@ def add_image_attachment(request):
                 new_attach.save()
                 message_image.save()
 
-        return JsonResponse({"success": "image added", "stripped_image": f"/account-static/{random_str}" })
+        return JsonResponse({"success": "image added", "stripped_image": f"/account-static/{random_str}{ext}" })
     else:
         return JsonResponse({"error": "Something went wrong.."})
         

@@ -16,6 +16,7 @@ color_choices = (
 class Attachment(models.Model):
     name = models.CharField(max_length=100, default="new filename")
     file = models.FilePathField(max_length=500, path="/var/www/replacement-twitter/account-static", null=True, blank=True)
+    ext = models.CharField(max_length=20, null=True, blank=True)
     created = models.DateTimeField(default=datetime.datetime.now())
     is_image = models.BooleanField(default=None, null=True)
     is_video = models.BooleanField(default=None, null=True)

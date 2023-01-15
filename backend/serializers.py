@@ -135,9 +135,14 @@ class AccountFollowingSerializer(serializers.ModelSerializer):
         
 class AttachmentSerializer(serializers.HyperlinkedModelSerializer):
     timeCreated = serializers.CharField(source="created")
+    videoType = serializers.SerializerMethodField()
+
+    def get_videoType(self, obj):
+        return f"video/{obj.ext}"
+    
     class Meta:
         model = Attachment
-        fields = ["id", 'url', "timeCreated", 'post', 'name', 'file_path']
+        fields = ["id", 'url', "timeCreated", 'videoType', 'name']
 
         
 class MessageSerializer(serializers.HyperlinkedModelSerializer):

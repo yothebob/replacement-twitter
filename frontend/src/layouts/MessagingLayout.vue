@@ -22,9 +22,12 @@
 			    />
 			</div>
 			<div v-else-if="msg.stripped_video != ''" style="padding: 20px;">
-			    <video width="320" height="240" controls>
-				<source :src="(msg.stripped_video)" type="video/mp4">
-			    </video>
+			    <video-player
+				:src="msg.stripped_video"
+				controls
+				width="320"
+				height="240"
+			    />
 			</div>
 			<div v-if="msg.content != ''">
 			    <q-chat-message
@@ -82,13 +85,17 @@
  import { defineComponent, ref } from 'vue'
  import { useAuthStore } from '../stores/auth';
  import  NewHeader from '../components/NewHeader.vue';
+ import emojis from '../emoji.js';
+ import { VideoPlayer } from '@videojs-player/vue'
+ import 'video.js/dist/video-js.css'
  
  export default defineComponent({
      name: 'MessagingLayout',
      
-     components: { NewHeader },
+     components: { NewHeader, VideoPlayer },
      data: () => {
 	 return {
+	     search: '',
 	     Messages: {},
 	     msgUploadedImage: null,
 	     typedMessage: "",
@@ -106,6 +113,11 @@
 
 	 this.Messages = await this.getChatroomMessages(this.$route.params.chatroom);
 	 this.Messages.chatroom_messages = this.Messages.chatroom_messages.reverse();
+
+	 for (const [key, val] of Object.entries( emojis.emojis.Objects)) {
+	     console.log(val)
+	 }
+	 /* this.typedMessage */
      },
      mounted: function () {
 	 this.timer = setInterval(() => {
@@ -116,22 +128,28 @@
 	 clearInterval(this.timer);
      },
      methods: {
+	 insert: function (emoji) {
+	     this.typedMessage += emoji;
+	 },
 	 addMessageImage: async function (msgId) {
 	     var data = new FormData()
 	     data.append('image', this.msgUploadedImage)
-	     const images = [".png", ".img", ".gif", ".jpeg", ".jpg", ".svg"]
-	     let is_image = true
-	     if (this.msgUploadedImage.name.includes(images)) {
-		 is_image = "True"
-	     } else {
-		 is_image = "False"
-	     }
-	     const imageAdd = await fetch("/api/image/add/",{
-		 method: "POST",
+	     const videos = [".mp4", ".mov", ".wmv", ".mkv", ".webm", ".m4a", ".m4v",".avi", ".ogg" ,".mpg", ".mpeg", ".flv"]
+	     let is_image = "True"
+	     let ext_type = ""
+	     videos.forEach((it) => {
+		 if (this.msgUploadedImage.name.includes(it)) {
+		     is_image = "False"
+		     ext_type = it
+		 }
+	     });
+	 const imageAdd = await fetch("/api/image/add/",{
+		     method: "POST",
 		 headers: { "Auth": this.Auth.refreshToken,
 			    "type": "message",
 			    "id": msgId ,
-			    "image": is_image
+			    "image": is_image,
+			    "ext": ext_type
 		 }, 
 		 body: data,
 	     })
