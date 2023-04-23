@@ -14,6 +14,7 @@
  const $q = useQuasar();
  
  onMounted(() => {
+     store.notes = authStore.notificationStack
      setInterval(async () => {
 	 store.notes = await authStore.checkNotifications();
      }, 5000);
@@ -25,9 +26,6 @@
 	 store.showNotes = false
      } else {
 	 store.showNotes = true
-	 console.log("set true")
-	 console.log(store.notes)
-	 console.log(store.notes.notifications[0])
 	 if ("notifications" in store.notes) {
 	     store.notes.notifications.forEach((no) => {
 		 console.log(no.message)

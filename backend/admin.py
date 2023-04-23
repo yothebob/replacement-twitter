@@ -7,5 +7,6 @@ admin.site.register(Attachment)
 admin.site.register(Comment)
 admin.site.register(Message)
 admin.site.register(Chatroom)
+admin.site.register(Notification)
 
 # Register your models here.

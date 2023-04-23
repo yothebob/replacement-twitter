@@ -85,10 +85,6 @@ class Notification(models.Model):
     message = models.CharField(max_length=200, default="this is a notification")
    
     
-    def __str__(self):
-        return self.name;
-
-    
     
 class Comment(models.Model):
     created = models.DateTimeField(default=datetime.datetime.now())

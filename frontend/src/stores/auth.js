@@ -133,7 +133,7 @@ export const useAuthStore = defineStore("auth", () => {
     }
     
     function clickNotificationStack (id) {
-	notificationStackId.value = notificationStackId.value + 1
+	notificationStackId.value = id
 	const goToNot = notificationStack.value.filter((ns) => {
 	    ns.id == id
 	});
@@ -154,6 +154,7 @@ export const useAuthStore = defineStore("auth", () => {
 	    }),
 	});
 	const json = await res.json();
+	notificationStack.value = json;
 	return json;
     }
     

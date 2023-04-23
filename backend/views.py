@@ -112,6 +112,7 @@ def chatrooms_send_message(request, chatroom_name):
         pickedChatroom = Chatroom.objects.filter(id=chatroom_var[-1]).first()
         pickedAccount = Account.objects.filter(id=decoded_jwt["account_id"]).first()
         if pickedAccount and pickedChatroom:
+            send_out_notifications(pickedAccount, f" New message in {pickedChatroom.name}", [u.id for u in Account.objects.filter(chatroom_accounts__in=[pickedChatroom])])
             #add image upload support seperate (I think there is an api for that)
             newMessage = Message(
                 created = datetime.datetime.now(),
@@ -124,6 +125,7 @@ def chatrooms_send_message(request, chatroom_name):
             pickedChatroom.save()
             updatedMessages = ChatroomSerializer(pickedChatroom)
             serialize_msg = MessageSerializer(newMessage)
+            print("sending message")
             send_out_notifications(pickedAccount, f" New message in {pickedChatroom.name}", [u.id for u in pickedChatroom.accounts])
             return JsonResponse({"success": "mesasge sent", "updated": updatedMessages.data, "newMsg": serialize_msg.data})
     except:
@@ -205,6 +207,7 @@ def follow_account(request):
     if account and follow_account:
         account.following.add(follow_account)
         account.save()
+        # send_out_notifications(, f"{account.username} added you to a new Chatroom called {json_decoded['name']}",[u.id for u in added_accounts]) TODO for following
         return JsonResponse({"success": "Account followed"})        
     else:
         return JsonResponse({"error": "Something went wrong.."})        
@@ -281,6 +284,7 @@ def like_item(request):
     account = Account.objects.filter(id=json_decoded["accountKey"]).first()
     if account is None:
         return JsonResponse({"error": "Account not found"})
+    # send_out_notifications(account, f"{pickedAccount.username} added you to a new Chatroom called {json_decoded['name']}",[u.id for u in added_accounts]) todo like
     if json_decoded["item"] == "post":
         post = Post.objects.filter(id=json_decoded["itemKey"]).first()
         if post is not None:
@@ -299,6 +303,7 @@ def like_item(request):
 @csrf_exempt
 def add_comment(request):
     # { accountId: 1, body: "test", postId: 1 }
+    # send_out_notifications(pickedAccount, f"{pickedAccount.username} added you to a new Chatroom called {json_decoded['name']}",[u.id for u in added_accounts]) add comment
     json_decoded = json.loads(request.body)
     if json_decoded["body"] is None:
         return JsonResponse({"error": "Cannot post empty comment"})
