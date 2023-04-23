@@ -1,5 +1,6 @@
 <script setup>
  import { useRouter } from 'vue-router';
+ import notification from "../components/notification.vue";
  import { ref } from 'vue';
  const router = useRouter();
  const props = defineProps({
@@ -47,6 +48,10 @@
 		<q-btn name="Profile" label="Profile" @click="router.push({path : profileLink })" />
 		<q-btn name="Images" label="Images" @click="router.push({path : imageLink})" />
 		<q-btn name="Chatrooms" label="Chatrooms" @click="router.push({path : chatLink})" />
+	    </div>
+	    <div class="row justify-end">
+		<notification
+		></notification>
 	    </div>
 	</q-toolbar>
     </q-header>

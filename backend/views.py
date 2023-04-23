@@ -10,8 +10,8 @@ from rest_framework import viewsets
 from django.http import JsonResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from .models import Account, Post, Attachment, Comment, Chatroom, Message
-from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer, AccountFollowingSerializer, ChatroomSerializer, MessageSerializer
+from .models import Account, Post, Attachment, Comment, Chatroom, Message, Notification
+from .serializers import AccountSerializer, PostSerializer, AttachmentSerializer, CommentSerializer, AccountFollowingSerializer, ChatroomSerializer, MessageSerializer, NotificationSerializer
 from .utils import encrypt
 from replacement_twitter.settings import SECRET_BYTE_KEY, SECRET_KEY
 from django.views.decorators.csrf import csrf_exempt
@@ -48,6 +48,18 @@ class AttachmentViewSet(viewsets.ModelViewSet):
     serializer_class = AttachmentSerializer
 
 #TODO switch to jwt auth for everything
+def send_out_notifications(creator_user, message, user_id_list=[]):
+    for uid in user_id_list:
+        found_user = Account.objects.get(id=uid)
+        new_note = Notification(
+            From=creator_user,
+            To=found_user,
+            message=message
+        )
+        new_note.save()
+        found_user.notifications = str(new_note.notification_id)
+        found_user.save()
+    return True
 
 
 @csrf_exempt
@@ -58,6 +70,7 @@ def create_chatroom(request):
         decoded_jwt =  jwt.decode(auth_jwt ,SECRET_KEY, algorithms=["HS256"])
         pickedAccount = Account.objects.filter(id=decoded_jwt["account_id"]).first()
         added_accounts = Account.objects.filter(username__in=json_decoded["accountNames"]).all()
+        send_out_notifications(pickedAccount, f"{pickedAccount.username} added you to a new Chatroom called {json_decoded['name']}",[u.id for u in added_accounts])
         if pickedAccount:
             new_chatroom = Chatroom(
                 created = datetime.datetime.now(),
@@ -111,6 +124,7 @@ def chatrooms_send_message(request, chatroom_name):
             pickedChatroom.save()
             updatedMessages = ChatroomSerializer(pickedChatroom)
             serialize_msg = MessageSerializer(newMessage)
+            send_out_notifications(pickedAccount, f" New message in {pickedChatroom.name}", [u.id for u in pickedChatroom.accounts])
             return JsonResponse({"success": "mesasge sent", "updated": updatedMessages.data, "newMsg": serialize_msg.data})
     except:
         return JsonResponse({"error": "Something went wrong... " })
@@ -425,6 +439,24 @@ def create_post(request):
             serializer = PostSerializer(new_post)
             return JsonResponse({"success": "post created", "post": serializer.data})
     # except:
+    else:
+        return JsonResponse({"error": "Something went wrong.."})
+        
+    
+@csrf_exempt
+def get_notifications(request):
+    json_decoded = json.loads(request.body)
+    if True:
+        decoded_jwt = jwt.decode(json_decoded["refresh"],SECRET_KEY, algorithms=["HS256"])
+        account = Account.objects.filter(id=json_decoded["account"]).first()
+        new_notifications = Notification.objects.filter(id__gt=json_decoded["notification"]).filter(To=account)
+        
+        if new_notifications is not None:
+            serialized = NotificationSerializer(new_notifications, many=True)
+            return JsonResponse({"success": "" , "notifications": serialized.data})
+        else:
+            return JsonResponse({"success": "" , "notifications": []})
+            
     else:
         return JsonResponse({"error": "Something went wrong.."})
         

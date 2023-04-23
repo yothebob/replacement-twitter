@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, watch } from "vue";
 import { computed } from "@vue/reactivity";
 import { useQuasar } from 'quasar';
+import { useRouter } from "vue-router";
 
 export const useAuthStore = defineStore("auth", () => {
     const refreshToken = ref(null);
@@ -11,6 +12,9 @@ export const useAuthStore = defineStore("auth", () => {
     const userData = ref(null);
     const darkMode = ref(false);
     const $q = useQuasar();
+    const notificationStack = ref([])
+    const notificationStackId = ref(0)
+    const router = useRouter(); 
     
   if (
     localStorage.getItem("refreshToken") &&
@@ -48,6 +52,12 @@ export const useAuthStore = defineStore("auth", () => {
   ) {
     darkMode.value = JSON.parse(localStorage.getItem("darkMode"));
   }
+  if (
+    localStorage.getItem("notificationStack") &&
+    localStorage.getItem("notificationStack") !== undefined
+  ) {
+    notificationStack.value = JSON.parse(localStorage.getItem("notificationStack"));
+  }
 
   watch( hasAccess,
     (hasAccessVal) => {
@@ -58,6 +68,12 @@ export const useAuthStore = defineStore("auth", () => {
   watch( darkMode,
     (darkModeVal) => {
 	localStorage.setItem("darkMode", JSON.stringify(darkModeVal));
+    },
+    { deep: true }
+   );
+  watch( notificationStack,
+    (notificationStackVal) => {
+	localStorage.setItem("notificationStack", JSON.stringify(notificationStackVal));
     },
     { deep: true }
   );
@@ -116,6 +132,31 @@ export const useAuthStore = defineStore("auth", () => {
       } else { this.hasAccess = false; }
     }
     
+    function clickNotificationStack (id) {
+	notificationStackId.value = notificationStackId.value + 1
+	const goToNot = notificationStack.value.filter((ns) => {
+	    ns.id == id
+	});
+	notificationStack.value = notificationStack.value.filter((ns) => {
+	    ns.id != id
+	})
+    }
+
+    async function checkNotifications () {
+	const url = "/api/notify/"
+	const res = await fetch(url, {
+	    method: "POST",
+	    headers: { "Content-Type": "application/json" },
+	    body: JSON.stringify({
+		refresh: this.refreshToken,
+		notification: notificationStackId.value,
+		account: userId.value
+	    }),
+	});
+	const json = await res.json();
+	return json;
+    }
+    
     function clearUserSession() {
 	localStorage.clear();
 	window.location.href = "/login/";
@@ -155,5 +196,8 @@ export const useAuthStore = defineStore("auth", () => {
     validateSession,
     clearUserSession,
       setDarkMode,
+      notificationStack,
+      checkNotifications,
+      clickNotificationStack,
   };
 });

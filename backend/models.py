@@ -77,6 +77,17 @@ class Chatroom(models.Model):
     def __str__(self):
         return self.name;
 
+class Notification(models.Model):
+    created = models.DateTimeField(default=datetime.datetime.now())
+    notification_id = models.CharField(max_length=20, default="0")
+    From = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="made_notifications")
+    To = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="user_notifications")
+    message = models.CharField(max_length=200, default="this is a notification")
+   
+    
+    def __str__(self):
+        return self.name;
+
     
     
 class Comment(models.Model):

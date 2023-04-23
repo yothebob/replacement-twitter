@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework import routers, serializers, viewsets
-from .models import Account, Post, Attachment, Comment, Message, Chatroom
+from .models import Account, Post, Attachment, Comment, Message, Chatroom, Notification
 from replacement_twitter.settings import ACCOUNT_STATIC_ROOT
 import pytz
 
@@ -182,3 +182,9 @@ class ChatroomSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Chatroom
         fields = ["id", 'timeCreated', 'name', 'chatroom_accounts', 'chatroom_messages']
+
+class NotificationSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Notification
+        fields = ["id", 'notification_id', 'message']
