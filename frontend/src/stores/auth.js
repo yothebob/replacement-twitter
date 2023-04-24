@@ -140,7 +140,7 @@ export const useAuthStore = defineStore("auth", () => {
 	      this.hasAccess = true;
 	      this.following = json.auth.following;
 	      this.userData = json.auth;
-	      this.notificationStackId = json.notification_id;
+	      this.notificationStackId = json.auth.notification_id;
 	  }
       } else { this.hasAccess = false; }
     }
