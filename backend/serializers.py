@@ -62,11 +62,19 @@ class AccountSerializer(serializers.ModelSerializer):
     posts = PostSerializer(many=True, read_only=True)
     stripped_profile_photo = serializers.SerializerMethodField()
     stripped_background_photo = serializers.SerializerMethodField()
+    notification_id = serializers.SerializerMethodField()
     
     def get_stripped_profile_photo(self, obj):
         if obj.profile_photo:
             return ACCOUNT_STATIC_ROOT + str(obj.profile_photo)
         return ""
+    
+    def get_notification_id(self, obj):
+        last_not = Notification.objects.filter(To=obj).last()
+        if last_not is not None:
+            return last_not.id
+        else:
+            return 0
     
     def get_stripped_background_photo(self, obj):
         if obj.background_photo:
@@ -75,7 +83,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ["id",'username', 'name', "stripped_profile_photo","stripped_background_photo", 'following', "posts", "post_color"]
+        fields = ["id",'username', 'name', "stripped_profile_photo","stripped_background_photo", 'following', "posts", "post_color", "notification_id"]
 
 # slimmer accountSerializer AKA no posts
 class FKAccountSerializer(serializers.ModelSerializer):

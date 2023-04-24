@@ -58,6 +58,12 @@ export const useAuthStore = defineStore("auth", () => {
   ) {
     notificationStack.value = JSON.parse(localStorage.getItem("notificationStack"));
   }
+  if (
+    localStorage.getItem("notificationStackId") &&
+    localStorage.getItem("notificationStackId") !== undefined
+  ) {
+    notificationStackId.value = JSON.parse(localStorage.getItem("notificationStackId"));
+  }
 
   watch( hasAccess,
     (hasAccessVal) => {
@@ -74,6 +80,12 @@ export const useAuthStore = defineStore("auth", () => {
   watch( notificationStack,
     (notificationStackVal) => {
 	localStorage.setItem("notificationStack", JSON.stringify(notificationStackVal));
+    },
+    { deep: true }
+  );
+  watch( notificationStackId,
+    (notificationStackIdVal) => {
+	localStorage.setItem("notificationStackId", JSON.stringify(notificationStackIdVal));
     },
     { deep: true }
   );
@@ -128,12 +140,15 @@ export const useAuthStore = defineStore("auth", () => {
 	      this.hasAccess = true;
 	      this.following = json.auth.following;
 	      this.userData = json.auth;
+	      this.notificationStackId = json.notification_id;
 	  }
       } else { this.hasAccess = false; }
     }
     
     function clickNotificationStack (id) {
-	notificationStackId.value = id
+	if (notificationStackId.value < id) {
+	    notificationStackId.value = id
+	}
 	const goToNot = notificationStack.value.filter((ns) => {
 	    ns.id == id
 	});
